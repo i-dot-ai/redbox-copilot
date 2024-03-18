@@ -1,3 +1,4 @@
+import requests
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
@@ -42,8 +43,15 @@ def documents_view(request):
 def upload_view(request):
     if request.method == "POST" and request.FILES["uploadDoc"]:
         doc = request.FILES["uploadDoc"]
-        print(doc)
-        # TO DO: handle file upload here
+        files = {"file": (doc.name, doc.read(), doc.content_type)}
+        url = "http://core-api:5002/file"
+        api_response = requests.post(url, files=files)
+
+        if api_response.status_code == 422:
+            print(api_response.json())
+        else:
+            print(api_response)
+
     return render(
         request,
         template_name="upload.html",
