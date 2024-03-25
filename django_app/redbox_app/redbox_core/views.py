@@ -1,6 +1,11 @@
-import requests
+from boto3.s3.transfer import TransferConfig
+from django.conf import settings
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
+from redbox_app.redbox_core.client import s3_client
+
+s3 = s3_client()
+CHUNK_SIZE = 1024
 
 from .models import File, ProcessingStatusEnum
 
@@ -42,15 +47,68 @@ def documents_view(request):
 
 def upload_view(request):
     if request.method == "POST" and request.FILES["uploadDoc"]:
-        doc = request.FILES["uploadDoc"]
-        files = {"file": (doc.name, doc.read(), doc.content_type)}
-        url = "http://core-api:5002/file"
-        api_response = requests.post(url, files=files)
+        # https://django-storages.readthedocs.io/en/1.13.2/backends/amazon-S3.html
+        file = request.FILES["uploadDoc"]
 
-        if api_response.status_code == 422:
-            print(api_response.json())
-        else:
-            print(api_response)
+        # Do some error handling here
+        # if file.filename is None:
+        #     raise ValueError("file name is null")
+        # if file.content_type is None:
+        #     raise ValueError("file type is null")
+
+        # s3.put_object(
+        #     Bucket=settings.BUCKET_NAME,
+        #     Body=file.file,
+        #     Key=file.name,
+        #     Tagging=f"file_type={file.content_type}",
+        # )
+
+        # for chunk in file.chunks():
+        #     s3.upload_fileobj(
+        #         Bucket=settings.BUCKET_NAME,
+        #         Fileobj=BytesIO(chunk),
+        #         Key=file.name,
+        #         ExtraArgs={"Tagging": f"file_type={file.content_type}"},
+        #     )
+
+        s3.upload_fileobj(
+            Bucket=settings.BUCKET_NAME,
+            Fileobj=file.file,
+            Key=file.name,
+            ExtraArgs={"Tagging": f"file_type={file.content_type}"},
+            Config=TransferConfig(
+                multipart_chunksize=CHUNK_SIZE,
+                preferred_transfer_client="auto",
+                multipart_threshold=CHUNK_SIZE,
+                use_threads=True,
+                max_concurrency=80,
+            ),
+        )
+
+        #     return JsonResponse(
+        #         {
+        #             "message": "OK",
+        #             "fileUrl": file_url,
+        #         }
+        #     )
+        # else:
+        #     return JsonResponse(
+        #         {
+        #             "message": "Error: file {filename} already exists in bucket {bucket_name}".format(
+        #                 filename=file_obj.name,
+        #                 bucket_name=file_storage.bucket_name,
+        #             ),
+        #         },
+        #         status=400,
+        # )
+
+        # url = "http://core-api:5002/file"
+        # api_response = requests.post(url, files=files)
+
+    #     if api_response.status_code == 422:
+    #         print(api_response.json())
+    #     else:
+    #         print(api_response)
 
     return render(
         request,
