@@ -1,4 +1,5 @@
 import os
+import uuid
 
 import requests
 from boto3.s3.transfer import TransferConfig
@@ -72,7 +73,7 @@ def documents_view(request):
 
 
 def get_file_extension(file):
-    # TODO: validate user file input
+    # TODO: validate user file input using a less flaky approach than:
     # return mimetypes.guess_extension(str(magic.from_buffer(file.read(), mime=True)))
 
     _, extension = os.path.splitext(file.name)
@@ -86,7 +87,7 @@ def upload_view(request):
 
         file_extension = get_file_extension(uploaded_file)
 
-        # Do some error handling here
+        # TODO: Surface errors to the users
         if uploaded_file.name is None:
             raise ValueError("file name is null")
         if uploaded_file.content_type is None:
@@ -94,12 +95,13 @@ def upload_view(request):
         if file_extension not in APPROVED_FILE_EXTENSIONS:
             raise ValueError(f"file type {file_extension} not approved")
 
-        file_obj = File.objects.create(name=uploaded_file.name)
+        file_key = f"{uuid.uuid4()}{file_extension}"
 
+        # TODO: can we upload chunks instead of having the file read?
         s3.upload_fileobj(
             Bucket=settings.BUCKET_NAME,
             Fileobj=uploaded_file,
-            Key=f"{file_obj.id}{file_extension}",
+            Key=file_key,
             ExtraArgs={"Tagging": f"file_type={uploaded_file.content_type}"},
             Config=TransferConfig(
                 multipart_chunksize=CHUNK_SIZE,
@@ -111,24 +113,28 @@ def upload_view(request):
         )
 
         # TODO: Handle S3 upload errors
-
         authenticated_s3_url = s3.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": settings.BUCKET_NAME,
-                "Key": f"{file_obj.id}{file_extension}",
+                "Key": file_key,
             },
             ExpiresIn=3600,
         )
         # Strip off the query string (we don't need the keys)
         simple_s3_url = authenticated_s3_url.split("?")[0]
-        file_obj.path = simple_s3_url
-        file_obj.save()
 
         # ingest file
-
+        # TODO: set url using ENV vars
         url = "http://core-api:5002/file"
-        api_response = requests.post(url, file_uuid=file_obj.uuid)
+        api_response = requests.post(
+            url,
+            params={
+                "name": uploaded_file.name,
+                "type": uploaded_file.content_type,
+                "location": simple_s3_url,
+            },
+        )
 
         # TODO: handle better
         return JsonResponse(api_response.json())
