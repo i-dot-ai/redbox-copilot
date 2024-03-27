@@ -2,23 +2,22 @@ import logging
 from datetime import datetime
 from uuid import UUID
 
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
-from faststream.rabbit import RabbitQueue, RabbitExchange
+from faststream.rabbit import RabbitExchange, RabbitQueue
+from faststream.rabbit.fastapi import RabbitRouter
 
 from redbox.model_db import SentenceTransformerDB
 from redbox.models import (
+    Chunk,
     EmbeddingResponse,
     File,
     ModelInfo,
     ProcessingStatusEnum,
     Settings,
     StatusResponse,
-    Chunk,
 )
 from redbox.storage import ElasticsearchStorageHandler
-
-from faststream.rabbit.fastapi import RabbitRouter
 
 # === Logging ===
 
@@ -112,38 +111,22 @@ def health():
 
 
 @app.post("/file", response_model=File, tags=["file"])
-async def create_upload_file(file: UploadFile, ingest: bool = True) -> File:
+async def create_upload_file(name: str, type: str, location: str, ingest=True) -> File:
     """Upload a file to the object store and create a record in the database
 
     Args:
-        file (UploadFile): The file to upload
+        name (str): The file name to be recorded
+        type (str): The file type to be recorded
+        location (str): The presigned file resource location
 
     Returns:
         File: The file record
     """
 
-    s3.put_object(
-        Bucket=env.bucket_name,
-        Body=file.file,
-        Key=file.filename,
-        Tagging=f"file_type={file.content_type}",
-    )
-
-    authenticated_s3_url = s3.generate_presigned_url(
-        "get_object",
-        Params={"Bucket": env.bucket_name, "Key": file.filename},
-        ExpiresIn=3600,
-    )
-    # Strip off the query string (we don't need the keys)
-    simple_s3_url = authenticated_s3_url.split("?")[0]
-    if file.filename is None:
-        raise ValueError("file name is null")
-    if file.content_type is None:
-        raise ValueError("file type is null")
     file_record = File(
-        name=file.filename,
-        path=simple_s3_url,
-        type=file.content_type,
+        name=name,
+        path=location,
+        type=type,
         creator_user_uuid="dev",
         storage_kind=env.object_store,
         processing_status=ProcessingStatusEnum.uploaded,
@@ -154,6 +137,7 @@ async def create_upload_file(file: UploadFile, ingest: bool = True) -> File:
     if ingest:
         await ingest_file(file_record.uuid)
 
+    # TODO: return something more sensible to the user (including errors)
     return file_record
 
 
