@@ -1,0 +1,79 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'feature/**'
+
+  # weekday mealtimes
+  schedule:
+    - cron: '* 6,12,18 * * 1-5'
+  # or on-demand
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend-test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@main
+      with:
+        # this might remove tools that are actually needed,
+        # if set to "true" but frees about 6 GB
+        tool-cache: false
+
+        # all of these default to true, but feel free to set to
+        # "false" if necessary for your workflow
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11"
+
+    - name: Set up Poetry
+      uses: abatilo/actions-poetry@v2
+      with:
+        poetry-version: 1.7.0
+
+    - name: Build Containers
+      run: |
+        mkdir -p data/elastic/
+        chmod 777 data/elastic/
+        cp .env.integration .env
+        docker compose up -d --wait core-api embedder ingester
+
+    - name: Wait 120s for services to be ready
+      run: |
+        sleep 120
+
+    - name: Test integration with pytest
+      run: |
+        pip install requests
+        pip install pytest
+        python -m pytest tests
+  
+    - name: Peek application logs
+      run: |
+        docker compose logs core-api
+
+    - name: Peek rabbit logs
+      run: |
+        docker compose logs rabbitmq
+
