@@ -22,6 +22,9 @@ RUN --mount=type=cache,target=$POETRY_CACHE_DIR  poetry install --no-ansi --with
 
 FROM python:3.11-slim-buster as runtime
 
+RUN apt-get update
+RUN apt-get install -y libmagic1
+
 ADD django_app/poetry.lock /app/poetry.lock
 ADD django_app/pyproject.toml /app/pyproject.toml
 

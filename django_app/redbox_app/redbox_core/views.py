@@ -1,13 +1,39 @@
+import os
+
+import requests
 from boto3.s3.transfer import TransferConfig
 from django.conf import settings
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 from redbox_app.redbox_core.client import s3_client
+from redbox_app.redbox_core.models import File, ProcessingStatusEnum
 
 s3 = s3_client()
 CHUNK_SIZE = 1024
-
-from .models import File, ProcessingStatusEnum
+# move this somewhere
+APPROVED_FILE_EXTENSIONS = [
+    ".eml",
+    ".html",
+    ".json",
+    ".md",
+    ".msg",
+    ".rst",
+    ".rtf",
+    ".txt",
+    ".xml",
+    ".csv",
+    ".doc",
+    ".docx",
+    ".epub",
+    ".odt",
+    ".pdf",
+    ".ppt",
+    ".pptx",
+    ".tsv",
+    ".xlsx",
+    ".htm",
+]
 
 
 @require_http_methods(["GET"])
@@ -45,37 +71,36 @@ def documents_view(request):
     )
 
 
+def get_file_extension(file):
+    # TODO: validate user file input
+    # return mimetypes.guess_extension(str(magic.from_buffer(file.read(), mime=True)))
+
+    _, extension = os.path.splitext(file.name)
+    return extension
+
+
 def upload_view(request):
     if request.method == "POST" and request.FILES["uploadDoc"]:
         # https://django-storages.readthedocs.io/en/1.13.2/backends/amazon-S3.html
-        file = request.FILES["uploadDoc"]
+        uploaded_file = request.FILES["uploadDoc"]
+
+        file_extension = get_file_extension(uploaded_file)
 
         # Do some error handling here
-        # if file.filename is None:
-        #     raise ValueError("file name is null")
-        # if file.content_type is None:
-        #     raise ValueError("file type is null")
+        if uploaded_file.name is None:
+            raise ValueError("file name is null")
+        if uploaded_file.content_type is None:
+            raise ValueError("file type is null")
+        if file_extension not in APPROVED_FILE_EXTENSIONS:
+            raise ValueError(f"file type {file_extension} not approved")
 
-        # s3.put_object(
-        #     Bucket=settings.BUCKET_NAME,
-        #     Body=file.file,
-        #     Key=file.name,
-        #     Tagging=f"file_type={file.content_type}",
-        # )
-
-        # for chunk in file.chunks():
-        #     s3.upload_fileobj(
-        #         Bucket=settings.BUCKET_NAME,
-        #         Fileobj=BytesIO(chunk),
-        #         Key=file.name,
-        #         ExtraArgs={"Tagging": f"file_type={file.content_type}"},
-        #     )
+        file_obj = File.objects.create(name=uploaded_file.name)
 
         s3.upload_fileobj(
             Bucket=settings.BUCKET_NAME,
-            Fileobj=file.file,
-            Key=file.name,
-            ExtraArgs={"Tagging": f"file_type={file.content_type}"},
+            Fileobj=uploaded_file,
+            Key=f"{file_obj.id}{file_extension}",
+            ExtraArgs={"Tagging": f"file_type={uploaded_file.content_type}"},
             Config=TransferConfig(
                 multipart_chunksize=CHUNK_SIZE,
                 preferred_transfer_client="auto",
@@ -85,30 +110,28 @@ def upload_view(request):
             ),
         )
 
-        #     return JsonResponse(
-        #         {
-        #             "message": "OK",
-        #             "fileUrl": file_url,
-        #         }
-        #     )
-        # else:
-        #     return JsonResponse(
-        #         {
-        #             "message": "Error: file {filename} already exists in bucket {bucket_name}".format(
-        #                 filename=file_obj.name,
-        #                 bucket_name=file_storage.bucket_name,
-        #             ),
-        #         },
-        #         status=400,
-        # )
+        # TODO: Handle S3 upload errors
 
-        # url = "http://core-api:5002/file"
-        # api_response = requests.post(url, files=files)
+        authenticated_s3_url = s3.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": settings.BUCKET_NAME,
+                "Key": f"{file_obj.id}{file_extension}",
+            },
+            ExpiresIn=3600,
+        )
+        # Strip off the query string (we don't need the keys)
+        simple_s3_url = authenticated_s3_url.split("?")[0]
+        file_obj.path = simple_s3_url
+        file_obj.save()
 
-    #     if api_response.status_code == 422:
-    #         print(api_response.json())
-    #     else:
-    #         print(api_response)
+        # ingest file
+
+        url = "http://core-api:5002/file"
+        api_response = requests.post(url, file_uuid=file_obj.uuid)
+
+        # TODO: handle better
+        return JsonResponse(api_response.json())
 
     return render(
         request,

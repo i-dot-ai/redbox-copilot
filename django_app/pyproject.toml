@@ -8,6 +8,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.11.2"
 django = "^4.2.8"
+python-magic = "^0.4.27"
 
 [tool.poetry.group.django-app.dependencies]
 python = "^3.11.2"
