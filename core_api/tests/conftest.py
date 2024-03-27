@@ -1,10 +1,11 @@
 import os
 from typing import Generator, TypeVar
 
+import boto3
 import pytest
 from elasticsearch import Elasticsearch
 from fastapi.testclient import TestClient
-from sentence_transformers import SentenceTransformer
+from moto import mock_aws
 
 from core_api.src.app import app as application
 from core_api.src.app import env
@@ -16,19 +17,25 @@ T = TypeVar("T")
 YieldFixture = Generator[T, None, None]
 
 
-@pytest.fixture(autouse=True)
-def small_model():
-    SentenceTransformer(env.embedding_model, cache_folder="./models")
+@pytest.fixture(scope="session", autouse=True)
+def aws_credentials():
+    """Mocked AWS Credentials for moto."""
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_SECURITY_TOKEN"] = "testing"
+    os.environ["AWS_SESSION_TOKEN"] = "testing"
+    os.environ["AWS_DEFAULT_REGION"] = "eu-west-2"
+
+
+@pytest.fixture(scope="function")
+def s3_client(aws_credentials):
+    with mock_aws():
+        yield boto3.client("s3", region_name="eu-west-2")
 
 
 @pytest.fixture
-def client():
+def client(aws_credentials):
     yield TestClient(application)
-
-
-@pytest.fixture
-def s3_client():
-    yield env.s3_client()
 
 
 @pytest.fixture
@@ -38,7 +45,8 @@ def es_client() -> YieldFixture[Elasticsearch]:
 
 @pytest.fixture
 def app_client():
-    yield TestClient(application)
+    with mock_aws():
+        yield TestClient(application)
 
 
 @pytest.fixture
@@ -102,7 +110,7 @@ def chunked_file(elasticsearch_storage_handler, stored_file) -> YieldFixture[Fil
 def bucket(s3_client):
     buckets = s3_client.list_buckets()
     if not any(bucket["Name"] == env.bucket_name for bucket in buckets["Buckets"]):
-        s3_client.create_bucket(Bucket=env.bucket_name)
+        s3_client.create_bucket(Bucket=env.bucket_name, CreateBucketConfiguration={"LocationConstraint": "eu-west-2"})
     yield env.bucket_name
 
 

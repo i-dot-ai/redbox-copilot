@@ -23,6 +23,7 @@ pydantic-settings = "^2.2.1"
 bumpversion = "^0.6.0"
 sentence-transformers = "^2.6.0"
 faststream = {extras = ["rabbit"], version = "^0.4.7"}
+moto = {extras = ["s3"], version = "^5.0.3"}
 
 [tool.poetry.group.api.dependencies]
 fastapi = "^0.110.0"

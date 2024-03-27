@@ -1,4 +1,5 @@
 import pytest
+from moto import mock_aws
 
 from ingester.src.worker import broker, ingest_channel, app
 from redbox.models import ProcessingStatusEnum
@@ -7,6 +8,7 @@ from redbox.storage import ElasticsearchStorageHandler
 from faststream.rabbit import TestRabbitBroker, TestApp
 
 
+@mock_aws
 @pytest.mark.asyncio
 async def test_ingest_file(s3_client, es_client, embedding_model, file):
     """
