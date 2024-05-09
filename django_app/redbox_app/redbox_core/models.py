@@ -1,4 +1,5 @@
 import uuid
+from datetime import date, timedelta
 
 import boto3
 from botocore.config import Config
@@ -7,6 +8,10 @@ from django.db import models
 from django_use_email_as_username.models import BaseUser, BaseUserManager
 from jose import jwt
 from yarl import URL
+
+
+def get_default_expiry_date():
+    return date.today() + timedelta(days=settings.FILE_EXPIRY_IN_DAYS)
 
 
 class UUIDPrimaryKeyBase(models.Model):
@@ -55,10 +60,13 @@ class ProcessingStatusEnum(models.TextChoices):
 
 
 class File(UUIDPrimaryKeyBase, TimeStampedModel):
-    processing_status = models.CharField(choices=ProcessingStatusEnum.choices, null=False, blank=False)
+    processing_status = models.CharField(
+        choices=ProcessingStatusEnum.choices, null=False, blank=False
+    )
     original_file = models.FileField(storage=settings.STORAGES["default"]["BACKEND"])
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     original_file_name = models.TextField(max_length=2048, blank=True, null=True)
+    expiry_date = models.DateField(default=get_default_expiry_date)
 
     def delete(self, using=None, keep_parents=False):
         #  Needed to make sure no orphaned files remain in the storage
@@ -96,11 +104,19 @@ class File(UUIDPrimaryKeyBase, TimeStampedModel):
 
     @property
     def name(self) -> str:
-        return self.original_file_name if self.original_file_name else self.original_file.name
+        return (
+            self.original_file_name
+            if self.original_file_name
+            else self.original_file.name
+        )
 
     def get_processing_status_text(self) -> str:
         return next(
-            (status[1] for status in ProcessingStatusEnum.choices if self.processing_status == status[0]),
+            (
+                status[1]
+                for status in ProcessingStatusEnum.choices
+                if self.processing_status == status[0]
+            ),
             "Unknown",
         )
 
