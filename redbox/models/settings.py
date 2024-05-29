@@ -118,11 +118,8 @@ class Settings(BaseSettings):
 
         log.info("Connecting to Elastic Cloud Cluster")
         log.info(f"Cloud ID = {self.elastic.cloud_id}")
-        log.info(f"Elastic Cloud API Key = {self.elastic.api_key}")
-
         es = Elasticsearch(cloud_id=self.elastic.cloud_id, api_key=self.elastic.api_key)
         if not es.ping():
-            log.info(f"API Key = {self.elastic.api_key}")
             log.info(es.info())
             raise ValueError("Connection to Elasticsearch failed")
         return es
