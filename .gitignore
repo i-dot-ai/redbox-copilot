@@ -204,3 +204,6 @@ django_app/tests/staticfiles
 # .tfstate files
 *.tfstate
 *.tfstate.*
+
+# Any temp files used for experimentation
+*-deleteme.py
