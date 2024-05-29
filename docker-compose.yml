@@ -55,7 +55,6 @@ services:
       - .env
     depends_on:
       - redis
-      - elasticsearch
       - minio
     networks:
       - redbox-app-network
@@ -76,7 +75,6 @@ services:
     networks:
       - redbox-app-network
     depends_on:
-      - elasticsearch
       - minio
       - redis
     restart: unless-stopped

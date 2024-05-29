@@ -1,10 +1,14 @@
 from typing import Literal, Optional
+from typing_extensions import Unpack
 
 import boto3
 from elasticsearch import Elasticsearch
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import logging
 
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger()
 
 class ElasticLocalSettings(BaseModel):
     """settings required for a local/ec2 instance of elastic"""
@@ -26,15 +30,25 @@ class ElasticCloudSettings(BaseModel):
     subscription_level: str = "basic"
 
 
+class LlmSettings(BaseModel):
+    azure_openai_endpoint: Optional[str] = None 
+    api_base:str = "https://api.openai.com"
+    open_api_version: str = "2023-12-01-preview"
+    name: str = "gpt-3.5-turbo"
+    type: Literal["azure", "openai"] = "openai"
+
 class Settings(BaseSettings):
     """Settings for the redbox application."""
 
     anthropic_api_key: Optional[str] = None
     openai_api_key: Optional[str] = None
+    azure_api_key: Optional[str] = None
 
     partition_strategy: Literal["auto", "fast", "ocr_only", "hi_res"] = "fast"
 
     elastic: ElasticCloudSettings | ElasticLocalSettings = ElasticLocalSettings()
+
+    llm: LlmSettings= LlmSettings()
 
     kibana_system_password: str = "redboxpass"
     metricbeat_internal_password: str = "redboxpass"
@@ -82,9 +96,12 @@ class Settings(BaseSettings):
     compression_enabled: bool = True
 
     model_config = SettingsConfigDict(env_file=".env", env_nested_delimiter="__", extra="allow")
+    
 
     def elasticsearch_client(self) -> Elasticsearch:
         if isinstance(self.elastic, ElasticLocalSettings):
+            log.info(f"Connecting to self managed Elasticsearch")
+            log.info(f"Elasticsearch host = {self.elastic.host}")
             es = Elasticsearch(
                 hosts=[
                     {
@@ -95,9 +112,19 @@ class Settings(BaseSettings):
                 ],
                 basic_auth=(self.elastic.user, self.elastic.password),
             )
+            if not es.ping():
+                raise ValueError("Connection to Elasticsearch failed")
             return es
 
+        log.info("Connecting to Elastic Cloud Cluster")
+        log.info(f"Cloud ID = {self.elastic.cloud_id}")
+        log.info(f"Elastic Cloud API Key = {self.elastic.api_key}")
+
         es = Elasticsearch(cloud_id=self.elastic.cloud_id, api_key=self.elastic.api_key)
+        if not es.ping():
+            log.info(f"API Key = {self.elastic.api_key}")
+            log.info(es.info())
+            raise ValueError("Connection to Elasticsearch failed")
         return es
 
     def s3_client(self):

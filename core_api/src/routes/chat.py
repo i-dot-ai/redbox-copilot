@@ -1,7 +1,8 @@
 import logging
+#from turtle import down
 from typing import Annotated
 from uuid import UUID
-
+import os 
 from fastapi import Depends, FastAPI, HTTPException
 from langchain.chains.llm import LLMChain
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
@@ -62,11 +63,41 @@ embedding_model_info = populate_embedding_model_info()
 
 # === LLM setup ===
 
+    # llm = ChatLiteLLM(
+    #     model="gpt-3.5-turbo",
+    #     streaming=True,
+    # )
+# Create the appropriate LLM, either openai, Azure, anthropic or bedrock
+llm: ChatLiteLLM = None
+if env.llm.type == "openai":
+    log.info("Creating OpenAI LLM Client")
+    llm = ChatLiteLLM(
+        model=env.llm.name,
+        streaming=True,
+        openai_key=env.openai_api_key,
+    )
+elif env.llm.type == "azure":
+    log.info("Creating Azure LLM Client")
+    log.debug(f"api_base: {env.llm.api_base}")
+    log.debug(f"api_version: {env.llm.open_api_version}")
+    os.environ["OPENAI_API_VERSION"] = env.llm.open_api_version
+    llm = ChatLiteLLM(
+        model=env.llm.name,
+        streaming=True,
+        azure_key=env.azure_api_key,
+        api_version=env.llm.open_api_version,
+        api_base=env.llm.api_base,
+        #set_verbosity=True
+    )
+elif env.llm.type == "anthropic":
+    log.info("Anthropic LLM not yet implemented")
+    raise ValueError("Anthropic LLM not yet implemented")
+elif env.llm.type == "bedrock":
+    log.info("Bedrock LLM not yet implemented")
+    raise ValueError("Bedrock LLM not yet implemented")
+else:
+    raise ValueError(f"Unknown LLM model type {env.llm.type}")
 
-llm = ChatLiteLLM(
-    model="gpt-3.5-turbo",
-    streaming=True,
-)
 
 es = env.elasticsearch_client()
 if env.elastic.subscription_level == "basic":
