@@ -144,8 +144,7 @@ def simple_chat(chat_request: ChatRequest, _user_uuid: Annotated[UUID, Depends(g
     messages = chat_prompt.format_messages()
 
     response = llm(messages)
-    log.info(f"LLM Response: {response.content}")
-    #chat_response:ChatResponse = ChatResponse(response_message=ChatMessage(text=response.text, role="ai"))
+
     chat_response:ChatResponse = ChatResponse(output_text=response.content)
     return chat_response
 
