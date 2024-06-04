@@ -1,18 +1,22 @@
 import logging
 from types import SimpleNamespace
+from typing import Annotated
 from uuid import UUID
 
 import boto3
 import requests
 from botocore.exceptions import ClientError
 from django.conf import settings
+from mypy_boto3_s3 import S3Client
 from redbox_app.redbox_core.models import User
+from wireup import Inject, service
 from yarl import URL
 
 logger = logging.getLogger(__name__)
 
 
-def s3_client():
+@service
+def s3_client_factory() -> S3Client:
     if settings.OBJECT_STORE == "s3":
         client = boto3.client(
             "s3",
@@ -39,10 +43,10 @@ def s3_client():
     return client
 
 
+@service
 class CoreApiClient:
-    def __init__(self, host: str, port: int):
-        self.host = host
-        self.port = port
+    host: Annotated[str, Inject(param="CORE_API_HOST")]
+    port: Annotated[int, Inject(param="CORE_API_PORT")]
 
     @property
     def url(self) -> URL:

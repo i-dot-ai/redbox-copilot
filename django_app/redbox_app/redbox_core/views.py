@@ -12,7 +12,6 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.http import require_http_methods
-from redbox_app.redbox_core.client import CoreApiClient
 from redbox_app.redbox_core.models import (
     ChatHistory,
     ChatMessage,
@@ -21,11 +20,12 @@ from redbox_app.redbox_core.models import (
     StatusEnum,
     User,
 )
+from redbox_app.redbox_core.services import CoreApiClient
 from requests.exceptions import HTTPError
+from wireup import container
 from yarl import URL
 
 logger = logging.getLogger(__name__)
-core_api = CoreApiClient(host=settings.CORE_API_HOST, port=settings.CORE_API_PORT)
 
 CHUNK_SIZE = 1024
 # move this somewhere
@@ -114,7 +114,8 @@ def upload_view(request):
     )
 
 
-def ingest_file(uploaded_file: UploadedFile, user: User) -> list[str]:
+@container.autowire
+def ingest_file(uploaded_file: UploadedFile, user: User, core_api: CoreApiClient) -> list[str]:
     errors: list[str] = []
     try:
         file = File.objects.create(
@@ -140,8 +141,9 @@ def ingest_file(uploaded_file: UploadedFile, user: User) -> list[str]:
     return errors
 
 
+@container.autowire
 @login_required
-def remove_doc_view(request, doc_id: uuid):
+def remove_doc_view(request, doc_id: uuid, core_api: CoreApiClient):
     file = File.objects.get(pk=doc_id)
     errors: list[str] = []
 
@@ -189,8 +191,9 @@ def chats_view(request: HttpRequest, chat_id: uuid.UUID | None = None):
     )
 
 
+@container.autowire
 @require_http_methods(["POST"])
-def post_message(request: HttpRequest) -> HttpResponse:
+def post_message(request: HttpRequest, core_api: CoreApiClient) -> HttpResponse:
     message_text = request.POST.get("message", "New chat")
 
     # get current session, or create a new one
@@ -226,9 +229,10 @@ def post_message(request: HttpRequest) -> HttpResponse:
     return redirect(reverse(chats_view, args=(session.id,)))
 
 
+@container.autowire
 @require_http_methods(["GET"])
 @login_required
-def file_status_api_view(request: HttpRequest) -> JsonResponse:
+def file_status_api_view(request: HttpRequest, core_api: CoreApiClient) -> JsonResponse:
     file_id = request.GET.get("id", None)
     if not file_id:
         logger.error("Error getting file object information - no file ID provided %s.")

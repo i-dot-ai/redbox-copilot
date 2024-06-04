@@ -7,6 +7,7 @@ import environ
 from dotenv import load_dotenv
 from redbox_app.setting_enums import Classification, Environment
 from storages.backends import s3boto3
+from wireup.integration.django import WireupSettings
 
 load_dotenv()
 
@@ -208,36 +209,24 @@ if ENVIRONMENT.is_test:
     MINIO_PORT = env.str("MINIO_PORT")
     MINIO_ENDPOINT = f"http://{MINIO_HOST}:{MINIO_PORT}"
     AWS_S3_ENDPOINT_URL = MINIO_ENDPOINT
-
-    STORAGES = {
-        "default": {
-            "BACKEND": s3boto3.S3Boto3Storage,
-        },
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
-    }
+    ALLOWED_HOSTS = ENVIRONMENT.hosts
 else:
-    STORAGES = {
-        "default": {
-            "BACKEND": s3boto3.S3Boto3Storage,
-        },
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
-    }
-
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
     # Mozilla guidance max-age 2 years
     SECURE_HSTS_SECONDS = 2 * 365 * 24 * 60 * 60
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SESSION_COOKIE_SECURE = True
-
-if ENVIRONMENT.is_test:
-    ALLOWED_HOSTS = ENVIRONMENT.hosts
-else:
     LOCALHOST = socket.gethostbyname(socket.gethostname())
     ALLOWED_HOSTS = [LOCALHOST, *ENVIRONMENT.hosts]
+
+STORAGES = {
+    "default": {
+        "BACKEND": s3boto3.S3Boto3Storage,
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 DATABASES = {
     "default": {
@@ -318,3 +307,5 @@ USE_STREAMING = env.bool("USE_STREAMING")
 FILE_EXPIRY_IN_SECONDS = env.int("FILE_EXPIRY_IN_DAYS") * 24 * 60 * 60
 SUPERUSER_EMAIL = env.str("SUPERUSER_EMAIL", None)
 MAX_SECURITY_CLASSIFICATION = Classification[env.str("MAX_SECURITY_CLASSIFICATION")]
+
+WIREUP = WireupSettings(service_modules=["redbox_app.redbox_core.services"])

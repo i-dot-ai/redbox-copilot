@@ -6,7 +6,8 @@ from pathlib import Path
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
 from django.core.management import call_command
-from redbox_app.redbox_core import client
+from mypy_boto3_s3 import S3Client
+from redbox_app.redbox_core import services
 from redbox_app.redbox_core.models import ChatHistory, ChatMessage, ChatRoleEnum, File, User
 
 logger = logging.getLogger(__name__)
@@ -67,8 +68,8 @@ def file_py_path() -> Path:
 
 
 @pytest.fixture()
-def s3_client():
-    return client.s3_client()
+def s3_client() -> S3Client:
+    return services.s3_client_factory()
 
 
 @pytest.fixture()
