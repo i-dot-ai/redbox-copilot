@@ -208,5 +208,5 @@ release: ## Deploy app
 # Runs the only the necessary backend for evaluation BUCKET_NAME
 .PHONY: eval_backend
 eval_backend:
-	docker compose up core-api worker -d --build
+	docker compose up core-api -d --build
 	docker exec -it $$(docker ps -q --filter "name=minio") mc mb data/$${BUCKET_NAME}
