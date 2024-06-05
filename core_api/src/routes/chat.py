@@ -157,7 +157,7 @@ async def build_retrieval_chain(
 
     standalone_question = condense_question_chain({"question": question, "chat_history": previous_history})["text"]
 
-    search_kwargs = {"filter": {"term": {"creator_user_uuid.keyword": str(user_uuid)}}}
+    search_kwargs = {"filter": {"term": {"creator_user_uuid": str(user_uuid)}}}
     docs = vector_store.as_retriever(search_kwargs=search_kwargs).get_relevant_documents(standalone_question)
 
     params = {

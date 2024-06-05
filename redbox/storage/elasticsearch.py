@@ -1,5 +1,7 @@
 import logging
 from collections.abc import Sequence
+from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID
 
 from elastic_transport import ObjectApiResponse
@@ -13,6 +15,59 @@ from redbox.storage.storage_handler import BaseStorageHandler
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
+
+
+class ReindexError(Exception):
+    """Migrating from one index mapping to another has failed."""
+
+
+def create_or_update_index_mapping(es: Elasticsearch, alias: str, mapping: dict[str, Any]) -> None:
+    try:
+        alias_info = es.indices.get_alias(name=alias)
+        old_index = next(iter(alias_info), None)
+    except NotFoundError:
+        alias_info = None
+        old_index = None
+
+    new_index = f"{alias}.{datetime.now(UTC).strftime('%Y-%m-%d-%H-%M-%S')}"
+
+    if old_index is None:
+        log.info("Creating new index %s, aliased to %s", new_index, alias)
+        es.indices.create(
+            index=new_index,
+            aliases={alias: {}},
+            mappings=mapping,
+        )
+    else:
+        mapping_remote = es.indices.get_mapping(index=old_index)[old_index]["mappings"]
+
+        if mapping_remote != mapping:
+            log.info("Updating mapping for %s, aliased to %s", old_index, alias)
+            es.indices.create(
+                index=new_index,
+                mappings=mapping,
+            )
+
+            response = es.reindex(source={"index": old_index}, dest={"index": new_index}, wait_for_completion=True)
+
+            if len(response["failures"]) > 0:
+                es.indices.delete(index=new_index)
+                error_count = f"Reindexing failed with {len(response['failures'])} errors"
+                raise ReindexError(error_count)
+
+            es.indices.update_aliases(
+                actions=[
+                    {"remove": {"index": old_index, "alias": alias}},
+                    {"add": {"index": new_index, "alias": alias}},
+                ]
+            )
+
+            es.indices.delete(index=old_index)
+            log.info(
+                "New index of %s, aliased to %s, successfully created with data from %s", new_index, alias, old_index
+            )
+        else:
+            log.info("No updates made to index %s, aliased to %s", new_index, alias)
 
 
 class ElasticsearchStorageHandler(BaseStorageHandler):
@@ -31,6 +86,46 @@ class ElasticsearchStorageHandler(BaseStorageHandler):
         """
         self.es_client = es_client
         self.root_index = root_index
+
+        create_or_update_index_mapping(
+            es=self.es_client,
+            alias=f"{self.root_index}-file",
+            mapping={
+                "properties": {
+                    "bucket": {"type": "keyword", "ignore_above": 50},
+                    "created_datetime": {"type": "date"},
+                    "creator_user_uuid": {"type": "keyword", "ignore_above": 36},
+                    "key": {"type": "keyword"},
+                    "model_type": {"type": "keyword", "ignore_above": 50},
+                    "uuid": {"type": "keyword", "ignore_above": 36},
+                }
+            },
+        )
+
+        create_or_update_index_mapping(
+            es=self.es_client,
+            alias=f"{self.root_index}-chunk",
+            mapping={
+                "properties": {
+                    "created_datetime": {"type": "date"},
+                    "creator_user_uuid": {"type": "keyword", "ignore_above": 36},
+                    "index": {"type": "long"},
+                    "metadata": {
+                        "properties": {
+                            "languages": {"type": "text"},
+                            "page_number": {"type": "long"},
+                            "parent_doc_uuid": {"type": "keyword", "ignore_above": 36},
+                        }
+                    },
+                    "model_type": {"type": "keyword", "ignore_above": 50},
+                    "parent_file_uuid": {"type": "keyword", "ignore_above": 36},
+                    "text": {"type": "text"},
+                    "text_hash": {"type": "text"},
+                    "token_count": {"type": "long"},
+                    "uuid": {"type": "keyword", "ignore_above": 36},
+                }
+            },
+        )
 
     def refresh(self, index: str = "*") -> ObjectApiResponse:
         return self.es_client.indices.refresh(index=f"{self.root_index}-{index}")
@@ -96,7 +191,7 @@ class ElasticsearchStorageHandler(BaseStorageHandler):
             result = scan(
                 client=self.es_client,
                 index=target_index,
-                query={"query": {"term": {"creator_user_uuid.keyword": str(user_uuid)}}},
+                query={"query": {"term": {"creator_user_uuid": str(user_uuid)}}},
                 _source=True,
             )
 
@@ -126,7 +221,7 @@ class ElasticsearchStorageHandler(BaseStorageHandler):
             results = scan(
                 client=self.es_client,
                 index=target_index,
-                query={"query": {"term": {"creator_user_uuid.keyword": str(user_uuid)}}},
+                query={"query": {"term": {"creator_user_uuid": str(user_uuid)}}},
                 _source=False,
             )
 
@@ -150,12 +245,12 @@ class ElasticsearchStorageHandler(BaseStorageHandler):
                             "must": [
                                 {
                                     "term": {
-                                        "parent_file_uuid.keyword": str(parent_file_uuid),
+                                        "parent_file_uuid": str(parent_file_uuid),
                                     }
                                 },
                                 {
                                     "term": {
-                                        "creator_user_uuid.keyword": str(user_uuid),
+                                        "creator_user_uuid": str(user_uuid),
                                     }
                                 },
                             ]
