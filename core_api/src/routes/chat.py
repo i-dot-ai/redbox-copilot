@@ -5,13 +5,14 @@ from uuid import UUID
 from fastapi import Depends, FastAPI, WebSocket
 from fastapi.encoders import jsonable_encoder
 from langchain_community.chat_models import ChatLiteLLM
+from langchain_core.embeddings import Embeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
 from langchain_elasticsearch import ElasticsearchStore
 
 from core_api.src.auth import get_user_uuid, get_ws_user_uuid
 from core_api.src.build_chains import build_retrieval_chain, build_summary_chain
-from core_api.src.dependencies import get_llm, get_storage_handler, get_vector_store
+from core_api.src.dependencies import get_embedding_model, get_llm, get_storage_handler, get_vector_store
 from core_api.src.semantic_routes import (
     ABILITY_RESPONSE,
     COACH_RESPONSE,
@@ -61,6 +62,7 @@ async def semantic_router_to_chain(
     llm: ChatLiteLLM,
     vector_store: ElasticsearchStore,
     storage_handler: ElasticsearchStorageHandler,
+    embedding_model: Embeddings,
 ) -> tuple[Runnable, dict[str, Any]]:
     question = chat_request.message_history[-1].text
     route = route_layer(question)
@@ -75,6 +77,7 @@ async def semantic_router_to_chain(
                 llm=llm,
                 vector_store=vector_store,
                 storage_handler=storage_handler,
+                embedding_model=embedding_model,
             )
             return chain, params
 
@@ -121,6 +124,7 @@ async def rag_chat_streamed(
     llm: Annotated[ChatLiteLLM, Depends(get_llm)],
     vector_store: Annotated[ElasticsearchStore, Depends(get_vector_store)],
     storage_handler: Annotated[ElasticsearchStorageHandler, Depends(get_storage_handler)],
+    embedding_model: Annotated[Embeddings, Depends(get_embedding_model)],
 ):
     """Websocket. Get a LLM response to a question history and file."""
     await websocket.accept()
@@ -130,7 +134,9 @@ async def rag_chat_streamed(
     request = await websocket.receive_text()
     chat_request = ChatRequest.model_validate_json(request)
 
-    chain, params = await semantic_router_to_chain(chat_request, user_uuid, llm, vector_store, storage_handler)
+    chain, params = await semantic_router_to_chain(
+        chat_request, user_uuid, llm, vector_store, storage_handler, embedding_model
+    )
 
     async for event in chain.astream_events(params, version="v1"):
         kind = event["event"]

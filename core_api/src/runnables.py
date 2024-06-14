@@ -77,7 +77,7 @@ class ESQuery(TypedDict):
 
 
 def make_es_retriever(
-    es: Elasticsearch, embedding_model: SentenceTransformerEmbeddings, chunk_index_name: str
+    es: Elasticsearch, embedding_model: SentenceTransformerEmbeddings, chunk_index_name: str, k: int = 5
 ) -> ElasticsearchRetriever:
     """Creates an Elasticsearch retriever runnable.
 
@@ -95,7 +95,7 @@ def make_es_retriever(
             knn_filter.append({"terms": {"parent_file_uuid.keyword": [str(uuid) for uuid in query["file_uuids"]]}})
 
         return {
-            "size": 5,
+            "size": k,
             "query": {
                 "bool": {
                     "must": [
@@ -103,7 +103,7 @@ def make_es_retriever(
                             "knn": {
                                 "field": "embedding",
                                 "query_vector": vector,
-                                "num_candidates": 10,
+                                "num_candidates": k,
                                 "filter": knn_filter,
                             }
                         }
