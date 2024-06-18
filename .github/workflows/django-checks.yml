@@ -39,11 +39,6 @@ jobs:
         run: |
           make check-migrations
 
-      - name: echo file
-        run: |
-          echo "test" > test.log
-          aws s3 cp test.log "s3://i-dot-ai-dev-github-runner-logs/test.log"
-
   run_tests:
     name: Run tests
 
