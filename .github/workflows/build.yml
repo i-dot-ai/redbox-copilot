@@ -17,6 +17,7 @@ jobs:
       ec2-instance-type: ${{ steps.export.outputs.ec2-instance-type }}
       version: ${{ steps.export.outputs.version }}
       runner-size: ${{ steps.export.outputs.runner-size }}
+      docker-build-instance: ${{ steps.export.outputs.docker-build-instance }}
 
 
     steps:
@@ -29,6 +30,7 @@ jobs:
           echo "app-name=${APP_NAME}" >> $GITHUB_OUTPUT
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "runner-size=${RUNNER_SIZE}" >> $GITHUB_OUTPUT
+          echo "docker-build-instance=${DOCKER_BUILD_INSTANCE}" >> $GITHUB_OUTPUT
 
   start-runner:
         uses: i-dot-ai/i-dot-ai-core-github-actions/.github/workflows/start-runner.yml@main
@@ -51,6 +53,7 @@ jobs:
       APP_NAME: ${{ needs.set-vars.outputs.app-name }}
       RUNNER_LABEL: ${{ needs.start-runner.outputs.label }}
       INFRASTRUCTURE_FOLDER: "infrastructure/aws"
+      DOCKER_BUILD_INSTANCE: ${{ needs.set-vars.outputs.docker-build-instance }}
     secrets:
       AWS_GITHUBRUNNER_PAT: ${{ secrets.AWS_GITHUBRUNNER_PAT}}
       AWS_GITHUBRUNNER_PAT_USER: ${{ secrets.AWS_GITHUBRUNNER_PAT_USER }}
