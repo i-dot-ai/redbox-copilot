@@ -53,18 +53,6 @@ jobs:
       AWS_GITHUBRUNNER_PAT: ${{ secrets.AWS_GITHUBRUNNER_PAT}}
       AWS_REGION: ${{ secrets.AWS_REGION }}
 
-  copy-logs:
-    needs:
-    - set-vars
-    - start-runner
-    runs-on: ${{ needs.start-runner.outputs.label }}
-    steps:
-      - name: echo file
-        run: |
-          echo "test" > test.log
-          aws s3 cp test.log "s3://i-dot-ai-dev-github-runner-logs/test.log"
-
-
   build-image:
     needs:
       - set-vars
