@@ -50,6 +50,7 @@ jobs:
     with:
       EC2_INSTANCE_TYPE: ${{ needs.set-vars.outputs.ec2-instance-type }}
       RUNNER_SIZE: ${{ needs.set-vars.outputs.runner-size }}
+      ENVIRONMENT: ${{ github.event.inputs.env }}
     secrets:
       AWS_GITHUBRUNNER_USER_ACCESS_KEY: ${{ secrets.AWS_GITHUBRUNNER_USER_ACCESS_KEY }}
       AWS_GITHUBRUNNER_USER_SECRET_ID: ${{ secrets.AWS_GITHUBRUNNER_USER_SECRET_ID }}
