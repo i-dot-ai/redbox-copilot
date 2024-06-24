@@ -43,21 +43,21 @@ resource "aws_service_discovery_service" "service_discovery_service" {
 resource "aws_secretsmanager_secret" "core-api-secret" {
   name = "${local.name}-core-api-secret"
   tags = {
-    SecretPurpose = "general"
+    "platform:secret-purpose" = "general"
   }
 }
 
 resource "aws_secretsmanager_secret" "django-app-secret" {
   name = "${local.name}-django-app-secret"
   tags = {
-    SecretPurpose = "general"
+    "platform:secret-purpose" = "general"
   }
 }
 
 resource "aws_secretsmanager_secret" "worker-secret" {
   name = "${local.name}-worker-secret"
   tags = {
-    SecretPurpose = "general"
+    "platform:secret-purpose" = "general"
   }
 }
 

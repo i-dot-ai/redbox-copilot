@@ -10,5 +10,8 @@ module "postgres" {
   db_master_username  = data.terraform_remote_state.redbox.outputs.db_master_username
   db_master_password  = data.terraform_remote_state.redbox.outputs.db_master_password
 
+  secret_tags = {
+    "platform:secret-purpose" = "general"
+  }
 }
 
