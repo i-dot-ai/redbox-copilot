@@ -1,4 +1,4 @@
-FROM python:3.11-buster as builder
+FROM python:3.11-slim-bookworm as builder
 
 WORKDIR /app/
 

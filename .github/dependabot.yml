@@ -17,4 +17,3 @@ updates:
     ignore:
       - dependency-name: faststream
       - dependency-name: torch
-      - dependency-name: sentence-transformers
