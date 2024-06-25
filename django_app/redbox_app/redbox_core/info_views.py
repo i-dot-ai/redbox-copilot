@@ -3,6 +3,8 @@ Views for info pages like privacy notice, accessibility statement, etc.
 These shouldn't contain sensitive data and don't require login.
 """
 
+import importlib
+
 from django.conf import settings
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
@@ -15,7 +17,8 @@ def privacy_notice_view(request):
 
 @require_http_methods(["GET"])
 def support_view(request):
-    return render(request, "support.html", {"contact_email": settings.CONTACT_EMAIL})
+    version = importlib.metadata.version("redbox_app")
+    return render(request, "support.html", {"contact_email": settings.CONTACT_EMAIL, "version": version})
 
 
 @require_http_methods(["GET"])
