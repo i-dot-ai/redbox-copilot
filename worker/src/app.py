@@ -7,11 +7,13 @@ from typing import TYPE_CHECKING
 
 from faststream import Context, ContextRepo, FastStream
 from faststream.redis import RedisBroker
+from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_core.runnables import RunnableLambda, chain
+from langchain_core.vectorstores import VectorStore
+from langchain_elasticsearch.vectorstores import ElasticsearchStore
 
-from redbox.model_db import SentenceTransformerDB
-from redbox.models import Chunk, EmbedQueueItem, File, Settings
-from redbox.parsing import chunk_file
-from redbox.storage.elasticsearch import ElasticsearchStorageHandler
+from redbox.models import File, Settings
+from worker.src.loader import UnstructuredDocumentLoader
 
 if TYPE_CHECKING:
     from mypy_boto3_s3.client import S3Client
@@ -32,76 +34,49 @@ publisher = broker.publisher(list=env.embed_queue_name)
 
 @asynccontextmanager
 async def lifespan(context: ContextRepo):
+    es_index_name = f"{env.elastic_root_index}-chunk"
     es = env.elasticsearch_client()
     s3_client = env.s3_client()
-    storage_handler = ElasticsearchStorageHandler(es_client=es, root_index=env.elastic_root_index)
-    model = SentenceTransformerDB(env.embedding_model)
+    # embeddings = AzureOpenAIEmbeddings(
+    #     azure_endpoint=env.azure_openai_endpoint,
+    #     openai_api_version="2023-05-15",
+    #     model=env.azure_embedding_model,
+    #     max_retries=env.embedding_max_retries,
+    #     retry_min_seconds=4,
+    #     retry_max_seconds=30
+    # )
+    embeddings = SentenceTransformerEmbeddings(model_name=env.embedding_model)
+    elasticsearch_store = ElasticsearchStore(
+        index_name=es_index_name,
+        embedding=embeddings,
+        es_connection=es,
+        query_field="text",
+        vector_query_field=env.embedding_document_field_name,
+    )
 
-    context.set_global("storage_handler", storage_handler)
-    context.set_global("model", model)
+    es.indices.create(index=es_index_name, ignore=[400])
+    context.set_global("vectorstore", elasticsearch_store)
     context.set_global("s3_client", s3_client)
-
     yield
 
 
-@broker.subscriber(list=env.ingest_queue_name)
-async def ingest(
-    file: File,
-    storage_handler: ElasticsearchStorageHandler = Context(),
-    s3_client: S3Client = Context(),
-    model: SentenceTransformerDB = Context(),
-):
-    """
-    1. Chunks file
-    2. Puts chunks to ES
-    3. Acknowledges message
-    4. Puts chunk on embedder-queue
-    """
+def document_loader(s3_client: S3Client, env: Settings):
+    @chain
+    def wrapped(file: File):
+        return UnstructuredDocumentLoader(file, s3_client, env).lazy_load()
 
+    return wrapped
+
+
+@broker.subscriber(list=env.ingest_queue_name)
+async def ingest(file: File, s3_client: S3Client = Context(), vectorstore: VectorStore = Context()):
     logging.info("Ingesting file: %s", file)
 
-    if env.clustering_strategy == "full":
-        logging.info("embedding - full")
-        chunks = chunk_file(
-            file=file, s3_client=s3_client, embedding_model=model, desired_chunk_size=env.ai.rag_desired_chunk_size
-        )
-    else:
-        logging.info("embedding - None")
-        chunks = chunk_file(file=file, s3_client=s3_client, desired_chunk_size=env.ai.rag_desired_chunk_size)
+    new_ids = (
+        document_loader(s3_client=s3_client, env=env) | RunnableLambda(list) | RunnableLambda(vectorstore.add_documents)
+    ).invoke(file)
 
-    logging.info("Writing %s chunks to storage for file uuid: %s", len(chunks), file.uuid)
-
-    items = storage_handler.write_items(chunks)
-    logging.info("written %s chunks to elasticsearch", len(items))
-
-    for chunk in chunks:
-        queue_item = EmbedQueueItem(chunk_uuid=chunk.uuid)
-        logging.info("Writing chunk to storage for chunk uuid: %s", chunk.uuid)
-        await publisher.publish(queue_item)
-
-    return items
-
-
-@broker.subscriber(list=env.embed_queue_name)
-async def embed(
-    queue_item: EmbedQueueItem,
-    storage_handler: ElasticsearchStorageHandler = Context(),
-    model: SentenceTransformerDB = Context(),
-):
-    """
-    1. embed queue-item text
-    2. update related chunk on ES
-    """
-
-    chunk: Chunk = storage_handler.read_item(queue_item.chunk_uuid, "Chunk")
-    embedded_sentences = model.embed_sentences([chunk.text])
-    if len(embedded_sentences.data) != 1:
-        logging.error("expected just 1 embedding but got %s", len(embedded_sentences.data))
-        return
-    chunk.embedding = embedded_sentences.data[0].embedding
-    storage_handler.update_item(chunk)
-
-    logging.info("embedded: %s", chunk.uuid)
+    logging.info("File: %s [%s] chunks ingested", file, len(new_ids))
 
 
 app = FastStream(broker=broker, lifespan=lifespan)

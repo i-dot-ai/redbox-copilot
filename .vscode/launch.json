@@ -18,6 +18,19 @@
             "envFile": "${workspaceFolder}/.env"
         },
         {
+            "name": "Worker",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "faststream",
+            "args": [
+                "run",
+                "worker.src.app:app",
+                "--workers", "1"
+            ],
+            "jinja": true,
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
             "name": "Python Debugger: Django",
             "type": "debugpy",
             "request": "launch",

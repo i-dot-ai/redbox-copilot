@@ -15,8 +15,9 @@ from langchain_elasticsearch import ApproxRetrievalStrategy, ElasticsearchRetrie
 
 from redbox.model_db import MODEL_PATH
 from redbox.models import Settings
-from redbox.models.file import UUID, Chunk
+from redbox.models.file import UUID
 from redbox.storage import ElasticsearchStorageHandler
+from redbox.storage.elasticsearch import hit_to_chunk
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
@@ -97,10 +98,32 @@ def get_es_retriever(
     def es_query(query: ESQuery, params: ESParams) -> dict[str, Any]:
         vector = get_embedding_model(env).embed_query(query["question"])
 
-        query_filter = [{"term": {"creator_user_uuid.keyword": str(query["user_uuid"])}}]
+        query_filter = [
+            {
+                "bool": {
+                    "should": [
+                        {"term": {"creator_user_uuid.keyword": str(query["user_uuid"])}},
+                        {"term": {"metadata.creator_user_uuid.keyword": str(query["user_uuid"])}},
+                    ]
+                }
+            }
+        ]
 
         if len(query["file_uuids"]) != 0:
-            query_filter.append({"terms": {"parent_file_uuid.keyword": [str(uuid) for uuid in query["file_uuids"]]}})
+            query_filter.append(
+                {
+                    "bool": {
+                        "should": [
+                            {"terms": {"parent_file_uuid.keyword": [str(uuid) for uuid in query["file_uuids"]]}},
+                            {
+                                "terms": {
+                                    "metadata.parent_file_uuid.keyword": [str(uuid) for uuid in query["file_uuids"]]
+                                }
+                            },
+                        ]
+                    }
+                }
+            )
 
         return {
             "size": params["size"],
@@ -131,9 +154,6 @@ def get_es_retriever(
             },
         }
 
-    def chunk_mapper(hit: dict[str, Any]) -> Chunk:
-        return Chunk(**hit["_source"])
-
     class ParameterisedElasticsearchRetriever(ElasticsearchRetriever):
         params: ESParams
         body_func: Callable[[str], dict]
@@ -154,7 +174,7 @@ def get_es_retriever(
         es_client=es,
         index_name=f"{env.elastic_root_index}-chunk",
         body_func=es_query,
-        document_mapper=chunk_mapper,
+        document_mapper=hit_to_chunk,
         params=default_params,
     ).configurable_fields(
         params=ConfigurableField(

@@ -37,6 +37,7 @@ websockets = "^12.0"
 [tool.poetry.group.worker.dependencies]
 opencv-python-headless = "^4.10.0.84"
 nltk = "^3.8.1"
+langchain-community = "^0.2.5"
 
 [tool.poetry.group.dev.dependencies]
 bumpversion = "^0.6.0"

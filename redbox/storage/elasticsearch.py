@@ -1,5 +1,6 @@
 import logging
 from collections.abc import Sequence
+from typing import Any
 from uuid import UUID
 
 from elastic_transport import ObjectApiResponse
@@ -96,7 +97,16 @@ class ElasticsearchStorageHandler(BaseStorageHandler):
             result = scan(
                 client=self.es_client,
                 index=target_index,
-                query={"query": {"term": {"creator_user_uuid.keyword": str(user_uuid)}}},
+                query={
+                    "query": {
+                        "bool": {
+                            "should": [
+                                {"term": {"creator_user_uuid.keyword": str(user_uuid)}},
+                                {"term": {"metadata.creator_user_uuid.keyword": str(user_uuid)}},
+                            ]
+                        }
+                    }
+                },
                 _source=True,
             )
 
@@ -126,7 +136,16 @@ class ElasticsearchStorageHandler(BaseStorageHandler):
             results = scan(
                 client=self.es_client,
                 index=target_index,
-                query={"query": {"term": {"creator_user_uuid.keyword": str(user_uuid)}}},
+                query={
+                    "query": {
+                        "bool": {
+                            "should": [
+                                {"term": {"creator_user_uuid.keyword": str(user_uuid)}},
+                                {"term": {"metadata.creator_user_uuid.keyword": str(user_uuid)}},
+                            ]
+                        }
+                    }
+                },
                 _source=False,
             )
 
@@ -140,7 +159,7 @@ class ElasticsearchStorageHandler(BaseStorageHandler):
         target_index = f"{self.root_index}-chunk"
 
         return [
-            Chunk(**item["_source"])
+            hit_to_chunk(item)
             for item in scan(
                 client=self.es_client,
                 index=target_index,
@@ -149,13 +168,19 @@ class ElasticsearchStorageHandler(BaseStorageHandler):
                         "bool": {
                             "must": [
                                 {
-                                    "term": {
-                                        "parent_file_uuid.keyword": str(parent_file_uuid),
+                                    "bool": {
+                                        "should": [
+                                            {"term": {"parent_file_uuid.keyword": str(parent_file_uuid)}},
+                                            {"term": {"metadata.parent_file_uuid.keyword": str(parent_file_uuid)}},
+                                        ]
                                     }
                                 },
                                 {
-                                    "term": {
-                                        "creator_user_uuid.keyword": str(user_uuid),
+                                    "bool": {
+                                        "should": [
+                                            {"term": {"creator_user_uuid.keyword": str(user_uuid)}},
+                                            {"term": {"metadata.creator_user_uuid.keyword": str(user_uuid)}},
+                                        ]
                                     }
                                 },
                             ]
@@ -209,4 +234,22 @@ class ElasticsearchStorageHandler(BaseStorageHandler):
             file_uuid=file_uuid,
             chunk_statuses=chunk_statuses,
             processing_status=ProcessingStatusEnum.complete if is_complete else ProcessingStatusEnum.embedding,
+        )
+
+
+def hit_to_chunk(hit: dict[str, Any]) -> Chunk:
+    if hit["_source"].get("uuid"):
+        # Legacy direct chunk storage
+        return Chunk(**hit["_source"])
+    else:
+        # Document storage
+        return Chunk(
+            uuid=hit["_id"],
+            text=hit["_source"]["text"],
+            index=hit["_source"]["metadata"]["index"],
+            embedding=hit["_source"]["embedding"],
+            created_datetime=hit["_source"]["metadata"]["created_datetime"],
+            creator_user_uuid=hit["_source"]["metadata"]["creator_user_uuid"],
+            parent_file_uuid=hit["_source"]["metadata"]["parent_file_uuid"],
+            metadata=hit["_source"]["metadata"],
         )

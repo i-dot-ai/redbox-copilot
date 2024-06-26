@@ -16,7 +16,7 @@ ADD redbox/ /app/redbox
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root --no-ansi --with api,ai --without worker,dev
 
-FROM python:3.11-slim-buster as runtime
+FROM python:3.11-slim-bookworm as runtime
 ARG EMBEDDING_MODEL
 
 WORKDIR /app/

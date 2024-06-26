@@ -125,7 +125,11 @@ class Settings(BaseSettings):
 
     openai_api_version: str = "2023-12-01-preview"
     azure_openai_model: str = "azure/gpt-35-turbo-16k"
+    azure_embedding_model: str = "text-embedding-ada-002"
     llm_max_tokens: int = 1024
+
+    embedding_max_retries: int = 4
+    embedding_document_field_name: str = "embedding"
 
     partition_strategy: Literal["auto", "fast", "ocr_only", "hi_res"] = "fast"
     clustering_strategy: Literal["full"] | None = None
@@ -151,6 +155,9 @@ class Settings(BaseSettings):
 
     embed_queue_name: str = "redbox-embedder-queue"
     ingest_queue_name: str = "redbox-ingester-queue"
+
+    worker_ingest_min_chunk_size: int = 120
+    worker_ingest_max_chunk_size: int = 300
 
     redis_host: str = "redis"
     redis_port: int = 6379

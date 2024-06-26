@@ -65,7 +65,6 @@ def test_user_journey(page: Page, email_address: str):
     chats_page.write_message = "What architecture is in use?"
     chats_page = chats_page.send()
     logger.debug("page: %s", chats_page)
-    logger.info("all_messages: %s", chats_page.get_all_messages_once_streaming_has_completed())
     latest_chat_response = chats_page.wait_for_latest_message()
     assert latest_chat_response.text
 
@@ -73,22 +72,22 @@ def test_user_journey(page: Page, email_address: str):
     chats_page = chats_page.start_new_chat()
     files_to_select = {f.name for f in upload_files if "README" in f.name}
     chats_page.selected_file_names = files_to_select
-    chats_page.write_message = "What architecture is in use?"
+    chats_page.write_message = "What licence is in use?"
     chats_page = chats_page.send()
 
     assert chats_page.selected_file_names == files_to_select
-    logger.info("all_messages: %s", chats_page.get_all_messages_once_streaming_has_completed())
     latest_chat_response = chats_page.wait_for_latest_message()
     assert latest_chat_response.text
     assert files_to_select.pop() in latest_chat_response.sources
 
-    # Select the summarise route
-    chats_page = chats_page.start_new_chat()
-    chats_page.write_message = "@summarise Please summarise the README documentation."
-    chats_page = chats_page.send()
-    latest_chat_response = chats_page.wait_for_latest_message()
-    assert latest_chat_response.text
-    assert latest_chat_response.route == "summarise"
+    # Use specific routes
+    for route in ["summarise", "search", "info"]:
+        chats_page = chats_page.start_new_chat()
+        chats_page.write_message = f"@{route} What do I need to install?"
+        chats_page = chats_page.send()
+        latest_chat_response = chats_page.wait_for_latest_message()
+        assert latest_chat_response.text
+        assert latest_chat_response.route == route
 
     # Delete a file
     documents_page = chats_page.navigate_to_documents()

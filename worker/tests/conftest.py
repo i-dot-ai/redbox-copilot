@@ -12,7 +12,7 @@ from redbox.storage import ElasticsearchStorageHandler
 from worker.src.app import app, env
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def s3_client():
     _client = env.s3_client()
     try:
@@ -27,7 +27,7 @@ def s3_client():
     return _client
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def es_client() -> Elasticsearch:
     return env.elasticsearch_client()
 
@@ -37,12 +37,12 @@ def embedding_model() -> SentenceTransformer:
     return SentenceTransformer(env.embedding_model)
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def file_pdf_path() -> Path:
     return Path(__file__).parents[2] / "tests" / "data" / "pdf" / "Cabinet Office - Wikipedia.pdf"
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def file(s3_client, file_pdf_path: Path):
     file_name = file_pdf_path.name
     file_type = file_pdf_path.suffix

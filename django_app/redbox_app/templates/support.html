@@ -4,56 +4,58 @@
 
 {% block content %}
 
-<div class="govuk-width-container">
+<div class="govuk-width-container iai-grid">
+  <div class="iai-grid__start-3-span-8">
 
-  <h1 class="govuk-heading-l">Support</h1>
+    <h1 class="govuk-heading-l">Support</h1>
 
-  {#
-  <h2 class="govuk-heading-m">User guide</h2>
-  <iframe src="https://player.vimeo.com/video/860937749?h=05caad19d6" class="video--iframe" frameborder="0" allowfullscreen title="<SYSTEM_NAME> support video"></iframe>
-  <p class="govuk-body">You can download the <a target="_blank" rel="noopener noreferrer" href="{{static('<USER_GUIDE_LOCATION>.pdf')}}" class="govuk-link"><SYSTEM_NAME> User Guide (PDF, 1.1MB)</a>, a step-by-step guide to signing in and using your <SYSTEM_NAME> account.</p>
+    {#
+    <h2 class="govuk-heading-m">User guide</h2>
+    <iframe src="https://player.vimeo.com/video/860937749?h=05caad19d6" class="video--iframe" frameborder="0" allowfullscreen title="<SYSTEM_NAME> support video"></iframe>
+    <p class="govuk-body">You can download the <a target="_blank" rel="noopener noreferrer" href="{{static('<USER_GUIDE_LOCATION>.pdf')}}" class="govuk-link"><SYSTEM_NAME> User Guide (PDF, 1.1MB)</a>, a step-by-step guide to signing in and using your <SYSTEM_NAME> account.</p>
 
-  <h2 class="govuk-heading-m">Accessing Redbox Copilot</h2>
-  <p class="govuk-body">You can access your Redbox Copilot account by visiting <a href="<SYSTEM_URL>" class="govuk-link"><SYSTEM_URL></a>. You'll need to type your work email address in the box provided and select the submit button.</p>
-  #}
+    <h2 class="govuk-heading-m">Accessing Redbox Copilot</h2>
+    <p class="govuk-body">You can access your Redbox Copilot account by visiting <a href="<SYSTEM_URL>" class="govuk-link"><SYSTEM_URL></a>. You'll need to type your work email address in the box provided and select the submit button.</p>
+    #}
 
-  <h2 class="govuk-heading-m">Signing in</h2>
-  <p class="govuk-body">If you're having trouble signing in to the Redbox Copilot platform, check that:</p>
+    <h2 class="govuk-heading-m">Signing in</h2>
+    <p class="govuk-body">If you're having trouble signing in to the Redbox Copilot platform, check that:</p>
 
-  <ul class="govuk-list govuk-list--bullet">
-    <li>you're using your work email address</li>
-    <li>you've typed your work email address correctly</li>
-  </ul>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>you're using your work email address</li>
+      <li>you've typed your work email address correctly</li>
+    </ul>
 
-  <p class="govuk-body">You should check your junk or spam folder for an email from Redbox Copilot.</p>
+    <p class="govuk-body">You should check your junk or spam folder for an email from Redbox Copilot.</p>
 
-  <p class="govuk-body">If you're still having trouble then you can contact us using the details at the bottom of this page.</p>
+    <p class="govuk-body">If you're still having trouble then you can contact us using the details at the bottom of this page.</p>
 
-  {#
-  <h2 class="govuk-heading-m">Email address not allowed</h2>
-  <p class="govuk-body">If you see the error message: "Currently you need a Civil Service email address to register", contact us using the details at the bottom of this page and include the name of your organisation.</p>
+    {#
+    <h2 class="govuk-heading-m">Email address not allowed</h2>
+    <p class="govuk-body">If you see the error message: "Currently you need a Civil Service email address to register", contact us using the details at the bottom of this page and include the name of your organisation.</p>
 
-  <h2 class="govuk-heading-m">Can’t find my government department</h2>
-  <p class="govuk-body">If you can’t find the department you belong to when you are signing in for the first time then go to the bottom of the dropdown list and if you are:</p>
-  <ul class="govuk-list govuk-list--bullet">
-    <li>a civil servant then choose: Other - Civil Servant</li>
-    <li>a public servant then choose: Other - Public Servant</li>
-    <li>not sure then choose: Other</li>
-  </ul>
+    <h2 class="govuk-heading-m">Can’t find my government department</h2>
+    <p class="govuk-body">If you can’t find the department you belong to when you are signing in for the first time then go to the bottom of the dropdown list and if you are:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>a civil servant then choose: Other - Civil Servant</li>
+      <li>a public servant then choose: Other - Public Servant</li>
+      <li>not sure then choose: Other</li>
+    </ul>
 
-  <h2 class="govuk-heading-m">Can’t find my grade</h2>
-  <p class="govuk-body">If the grades shown do not fit with your role then either choose the one that is equivalent to your role or select ‘Other’.</p>
-  #}
+    <h2 class="govuk-heading-m">Can’t find my grade</h2>
+    <p class="govuk-body">If the grades shown do not fit with your role then either choose the one that is equivalent to your role or select ‘Other’.</p>
+    #}
 
-  <h2 class="govuk-heading-m">Bug or site vulnerability</h2>
-  <p class="govuk-body">If you've found an issue or a vulnerability, contact us using the details at the bottom of this page including as much information as possible.</p>
+    <h2 class="govuk-heading-m">Bug or site vulnerability</h2>
+    <p class="govuk-body">If you've found an issue or a vulnerability, contact us using the details at the bottom of this page including as much information as possible.</p>
 
-  <h2 class="govuk-heading-m">Website not loading</h2>
-  <p class="govuk-body">If the website is not loading, please close the browser tab and try again later.</p>
+    <h2 class="govuk-heading-m">Website not loading</h2>
+    <p class="govuk-body">If the website is not loading, please close the browser tab and try again later.</p>
 
-  <h2 class="govuk-heading-m">Contact us</h2>
-  <p class="govuk-body">If you've read the information above but haven't been able to find a solution to your problem, please email us at <a href="mailto:{{contact_email}}" class="govuk-link">{{contact_email}}</a> including as much information as possible. Please include the current version number, which is {{ version }}.</p>
+    <h2 class="govuk-heading-m">Contact us</h2>
+    <p class="govuk-body">If you've read the information above but haven't been able to find a solution to your problem, please email us at <a href="mailto:{{contact_email}}" class="govuk-link">{{contact_email}}</a> including as much information as possible. Please include the current version number, which is {{ version }}.</p>
 
+  </div>
 </div>
 
 {% endblock %}

@@ -24,6 +24,7 @@ def make_headers(user_uuid: UUID):
 class TestEndToEnd:
     file_uuids: ClassVar[dict[UUID, str]] = {}
     source_document_file_uuids: ClassVar[dict[UUID, set[str]]] = {}
+    route_name: str = ""
 
     @pytest.mark.parametrize("user_uuid", USER_UUIDS)
     def test_upload_to_search(self, file_path: Path, s3_client, user_uuid):
@@ -124,6 +125,9 @@ class TestEndToEnd:
         assert TestEndToEnd.file_uuids[user_uuid] in source_document_file_uuids
         TestEndToEnd.source_document_file_uuids[user_uuid] = source_document_file_uuids
 
+        TestEndToEnd.route_name = rag_response.json()["route_name"]
+        assert TestEndToEnd.route_name == "search"
+
     @pytest.mark.parametrize("user_uuid", USER_UUIDS)
     def test_post_rag_fail(self, user_uuid):
         """
@@ -149,6 +153,30 @@ class TestEndToEnd:
             source_document["file_uuid"] for source_document in rag_response.json()["source_documents"]
         }
         assert TestEndToEnd.file_uuids[user_uuid] not in source_document_file_uuids
+
+        TestEndToEnd.route_name = rag_response.json()["route_name"]
+        assert TestEndToEnd.route_name == "search"
+
+    @pytest.mark.parametrize("user_uuid", USER_UUIDS)
+    def test_post_rag_summarisation(self, user_uuid):
+        rag_response = requests.post(
+            f"http://{TEST_ORIGIN}/chat/rag",
+            json={
+                "message_history": [
+                    {
+                        "role": "user",
+                        "text": "Please summarise the contents of the uploaded files.",
+                    }
+                ],
+                "selected_files": [{"uuid": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"}],
+            },
+            headers=make_headers(user_uuid),
+            timeout=30,
+        )
+        assert rag_response.status_code == HTTPStatus.OK
+
+        TestEndToEnd.route_name = rag_response.json()["route_name"]
+        assert TestEndToEnd.route_name == "summarise"
 
     @pytest.mark.parametrize("user_uuid", USER_UUIDS)
     def test_permissions(self, user_uuid):
@@ -192,6 +220,8 @@ class TestEndToEnd:
                         all_text.append(actual["data"])
                     elif actual["resource_type"] == "documents":
                         source_documents.extend(actual["data"])
+                    elif actual["resource_type"] == "route_name":
+                        TestEndToEnd.route_name = actual["data"]
             except ConnectionClosed:
                 break
 
@@ -200,6 +230,8 @@ class TestEndToEnd:
 
         assert TestEndToEnd.file_uuids[user_uuid] in source_document_file_uuids
         TestEndToEnd.source_document_file_uuids[user_uuid] = source_document_file_uuids
+
+        assert TestEndToEnd.route_name == "search"
 
     @pytest.mark.asyncio()
     @pytest.mark.parametrize("user_uuid", USER_UUIDS)
@@ -229,25 +261,11 @@ class TestEndToEnd:
                         all_text.append(actual["data"])
                     elif actual["resource_type"] == "documents":
                         source_documents.extend(actual["data"])
+                    elif actual["resource_type"] == "route_name":
+                        TestEndToEnd.route_name = actual["data"]
             except ConnectionClosed:
                 break
 
         assert all_text == ["You're welcome!"]
 
-    @pytest.mark.parametrize("user_uuid", USER_UUIDS)
-    def test_post_rag_stuff(self, user_uuid):
-        rag_response = requests.post(
-            f"http://{TEST_ORIGIN}/chat/rag",
-            json={
-                "message_history": [
-                    {
-                        "role": "user",
-                        "text": "Please summarise the contents of the uploaded files.",
-                    }
-                ],
-                "selected_files": [{"uuid": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"}],
-            },
-            headers=make_headers(user_uuid),
-            timeout=30,
-        )
-        assert rag_response.status_code == HTTPStatus.OK
+        assert TestEndToEnd.route_name == "gratitude"
