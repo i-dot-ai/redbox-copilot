@@ -7,9 +7,9 @@ from semantic_router.encoders import HuggingFaceEncoder
 from semantic_router.layer import RouteLayer
 
 from core_api.src.build_chains import (
-    build_map_reduce_summary_chain,
     build_retrieval_chain,
     build_static_response_chain,
+    build_summary_chain,
     build_vanilla_chain,
 )
 from redbox.model_db import MODEL_PATH
@@ -165,7 +165,7 @@ def get_semantic_route_layer(routes: Annotated[list[Route], Depends(get_semantic
 
 def get_routable_chains(
     retrieval_chain: Annotated[Runnable, Depends(build_retrieval_chain)],
-    summary_chain: Annotated[Runnable, Depends(build_map_reduce_summary_chain)],
+    summary_chain: Annotated[Runnable, Depends(build_summary_chain)],
     vanilla_chain: Annotated[Runnable, Depends(build_vanilla_chain)],
 ):
     global __routable_chains  # noqa: PLW0603

@@ -2,7 +2,6 @@ import logging
 from operator import itemgetter
 from typing import Annotated
 
-import numpy as np
 from fastapi import Depends
 from langchain.prompts import PromptTemplate
 from langchain.schema import StrOutputParser
@@ -70,44 +69,6 @@ def build_summary_chain(
     storage_handler: Annotated[ElasticsearchStorageHandler, Depends(dependencies.get_storage_handler)],
     env: Annotated[Settings, Depends(dependencies.get_env)],
 ) -> Runnable:
-    def make_document_context(input_dict):
-        documents: list[Chunk] = []
-        for selected_file in input_dict["file_uuids"]:
-            chunks = get_file_chunked_to_tokens(
-                file_uuid=selected_file,
-                user_uuid=input_dict["user_uuid"],
-                storage_handler=storage_handler,
-            )
-            documents += chunks
-
-        # right now, can only handle a single document so we manually truncate
-        max_tokens = (env.ai.summarisation_chunk_max_tokens,)
-        doc_token_sum = np.cumsum([doc.token_count for doc in documents])
-        doc_token_sum_limit_index = len([i for i in doc_token_sum if i < max_tokens])
-
-        documents_trunc = documents[:doc_token_sum_limit_index]
-        if len(documents) < doc_token_sum_limit_index:
-            log.info("Documents were longer than 20k tokens. Truncating to the first 20k.")
-        return documents_trunc
-
-    return (
-        RunnablePassthrough.assign(documents=(make_document_context | RunnableLambda(format_chunks)))
-        | make_chat_prompt_from_messages_runnable(
-            env.ai.summarisation_system_prompt, env.ai.summarisation_question_prompt
-        )
-        | llm
-        | {
-            "response": StrOutputParser(),
-            "route_name": RunnableLambda(lambda _: ChatRoute.summarise.value),
-        }
-    )
-
-
-def build_map_reduce_summary_chain(
-    llm: Annotated[ChatLiteLLM, Depends(dependencies.get_llm)],
-    storage_handler: Annotated[ElasticsearchStorageHandler, Depends(dependencies.get_storage_handler)],
-    env: Annotated[Settings, Depends(dependencies.get_env)],
-) -> Runnable:
     def make_document_context(input_dict: dict):
         documents: list[Chunk] = []
         for selected_file in input_dict["file_uuids"]:
@@ -121,6 +82,18 @@ def build_map_reduce_summary_chain(
 
         input_dict["documents"] = documents
         return documents
+
+    # Stuff chain now missing the RunnabeLambda to format the chunks
+    stuff_chain = (
+        make_chat_prompt_from_messages_runnable(
+            env.ai.summarisation_system_prompt, env.ai.summarisation_question_prompt
+        )
+        | llm
+        | {
+            "response": StrOutputParser(),
+            "route_name": RunnableLambda(lambda _: ChatRoute.stuff_summary.value),
+        }
+    )
 
     @chain
     def map_operation(input_dict):
@@ -147,16 +120,31 @@ def build_map_reduce_summary_chain(
         input_dict["summaries"] = summaries
         return input_dict
 
-    return (
-        RunnablePassthrough.assign(documents=make_document_context)
-        | map_operation
+    map_reduce_chain = (
+        map_operation
         | make_chat_prompt_from_messages_runnable(env.ai.reduce_system_prompt, env.ai.reduce_question_prompt)
         | llm
         | {
             "response": StrOutputParser(),
-            "route_name": RunnableLambda(lambda _: ChatRoute.summarise.value),
+            "route_name": RunnableLambda(lambda _: ChatRoute.map_reduce_summary.value),
         }
     )
+
+    @chain
+    def summarisation_route(input_dict):
+        documents = [chunk.text for chunk in input_dict["documents"]]
+
+        if len(documents) == 1:
+            return stuff_chain
+
+        elif len(documents) > 1:
+            return map_reduce_chain
+
+        else:
+            msg = "No documents to summarise"
+            raise ValueError(msg)
+
+    return RunnablePassthrough.assign(documents=make_document_context) | summarisation_route
 
 
 def build_static_response_chain(prompt_template, route_name) -> Runnable:

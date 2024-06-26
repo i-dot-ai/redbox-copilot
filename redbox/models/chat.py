@@ -27,7 +27,8 @@ class SelectedDocument(BaseModel):
 class ChatRequest(BaseModel):
     message_history: list[ChatMessage] = Field(description="The history of messages in the chat")
     selected_files: list[SelectedDocument] = Field(
-        description="Documents selected to use for the current chat request", default_factory=list
+        description="Documents selected to use for the current chat request",
+        default_factory=list,
     )
 
     model_config = {
@@ -69,6 +70,8 @@ class ChatRoute(StrEnum):
     gratitude = "gratitude"
     search = "search"
     summarise = "summarise"
+    stuff_summary = "stuff_summary"
+    map_reduce_summary = "map_reduce_summary"
     extract = "extract"
     chat = "chat"
     supasearch = "supasearch"
