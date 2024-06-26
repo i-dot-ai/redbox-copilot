@@ -1,12 +1,11 @@
-import importlib
-
 from bs4 import BeautifulSoup
+from django.conf import settings
 from django.test import Client
 
 
 def test_support_view_contains_contact_emai_and_version_number(client: Client):
     # Given
-    version = importlib.metadata.version("redbox_app")
+    version = settings.REDBOX_VERSION
 
     # When
     response = client.get("/support/")
