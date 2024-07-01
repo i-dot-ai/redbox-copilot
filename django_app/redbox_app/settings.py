@@ -1,5 +1,5 @@
 # mypy: ignore-errors
-
+import os
 import socket
 from pathlib import Path
 
@@ -331,3 +331,5 @@ CHAT_TITLE_LENGTH = 30
 FILE_EXPIRY_IN_SECONDS = env.int("FILE_EXPIRY_IN_DAYS") * 24 * 60 * 60
 SUPERUSER_EMAIL = env.str("SUPERUSER_EMAIL", None)
 MAX_SECURITY_CLASSIFICATION = Classification[env.str("MAX_SECURITY_CLASSIFICATION")]
+
+REDBOX_VERSION = os.environ.get("REDBOX_VERSION", "not set")

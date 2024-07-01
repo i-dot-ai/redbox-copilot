@@ -15,7 +15,9 @@ def privacy_notice_view(request):
 
 @require_http_methods(["GET"])
 def support_view(request):
-    return render(request, "support.html", {"contact_email": settings.CONTACT_EMAIL})
+    return render(
+        request, "support.html", {"contact_email": settings.CONTACT_EMAIL, "version": settings.REDBOX_VERSION}
+    )
 
 
 @require_http_methods(["GET"])
