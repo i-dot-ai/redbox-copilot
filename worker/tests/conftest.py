@@ -4,10 +4,8 @@ from uuid import uuid4
 import pytest
 from botocore.exceptions import ClientError
 from elasticsearch import Elasticsearch
-from sentence_transformers import SentenceTransformer
 
-from redbox.models import Chunk, EmbedQueueItem, File
-from redbox.storage import ElasticsearchStorageHandler
+from redbox.models import File
 from worker.app import env
 
 
@@ -31,8 +29,6 @@ def es_client() -> Elasticsearch:
     return env.elasticsearch_client()
 
 
-
-
 @pytest.fixture(scope="session")
 def file_pdf_path() -> Path:
     return Path(__file__).parents[2] / "tests" / "data" / "pdf" / "Cabinet Office - Wikipedia.pdf"
@@ -52,8 +48,3 @@ def file(s3_client, file_pdf_path: Path):
         )
 
     return File(key=file_name, bucket=env.bucket_name, creator_user_uuid=uuid4())
-
-
-
-
-
