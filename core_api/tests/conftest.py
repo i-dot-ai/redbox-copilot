@@ -23,12 +23,12 @@ from redbox.models import Chunk, File, Settings
 from redbox.storage import ElasticsearchStorageHandler
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def env():
     return Settings()
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def s3_client(env):
     _client = env.s3_client()
     try:
@@ -43,7 +43,7 @@ def s3_client(env):
     return _client
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def es_client(env) -> Elasticsearch:
     return env.elasticsearch_client()
 
@@ -243,3 +243,26 @@ def parameterised_retriever(env, es_client, embedding_model_dim) -> Parameterise
             id="params", name="Retriever parameters", description="A dictionary of parameters to use for the retriever."
         )
     )
+
+
+# Pytest internal functions for skipping tests unless selected
+# See https://docs.pytest.org/en/latest/example/simple.html
+# #control-skipping-of-tests-according-to-command-line-option
+
+
+def pytest_addoption(parser):
+    parser.addoption("--ai", action="store_true", default=False, help="run ai tests that use live LLMs")
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "ai: mark test as using live LLMs")
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--ai"):
+        # --ai given in cli: do not skip live LLM tests
+        return
+    skip_ai = pytest.mark.skip(reason="need --ai option to run")
+    for item in items:
+        if "ai" in item.keywords:
+            item.add_marker(skip_ai)
