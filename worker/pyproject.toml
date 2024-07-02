@@ -16,6 +16,8 @@ redbox = {path="../redbox-core", develop=true}
 opencv-python-headless = "^4.10.0.84"
 nltk = "^3.8.1"
 langchain-community = "^0.2.6"
+pillow-heif= "^0.16.0"
+
 
 
 [tool.poetry.group.dev.dependencies]
