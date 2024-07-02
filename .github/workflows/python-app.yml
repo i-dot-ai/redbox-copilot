@@ -51,7 +51,7 @@ jobs:
         cp .env.test .env
         docker compose up -d --wait elasticsearch
 
-        poetry install --no-root --no-ansi --with dev --without api
+        poetry install --no-root --no-ansi
         poetry run python download_embedder.py --embedding_model paraphrase-albert-small-v2
 
     - name: Add dependencies for worker
