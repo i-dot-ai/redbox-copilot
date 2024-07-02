@@ -8,11 +8,9 @@ ENV POETRY_NO_INTERACTION=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 WORKDIR /app/
+ADD redbox-core/ /app/redbox-core
+ADD README.md /app
 ADD pyproject.toml poetry.lock ./
-ADD redbox-core /app/redbox-core
-ADD download_embedder.py /app/
-ADD README.md /app/README.md
-
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root --no-ansi --with worker,api --without ai,dev
 
 FROM python:3.11-slim-buster as runtime
@@ -21,25 +19,10 @@ RUN apt update && apt-get install -y \
     tesseract-ocr \
     libmagic-dev
 
-ARG EMBEDDING_MODEL
-
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-
-WORKDIR /app/
-ADD redbox-core/ /app/redbox-core
-ADD README.md /app/README.md
-ADD worker/ /app/worker
-ADD download_embedder.py /app/
-ADD worker/download_ocr_models.py /app/
-
-ADD worker/health.sh /app/
-RUN chmod +x /app/health.sh
-
-# Download the model
-RUN python download_embedder.py --embedding_model ${EMBEDDING_MODEL}
 
 # Downlaod Sentence Tokenizer
 RUN python -m nltk.downloader punkt
@@ -48,6 +31,16 @@ RUN python -m nltk.downloader punkt
 RUN python -m nltk.downloader averaged_perceptron_tagger
 
 # Download the OCR models
-RUN python download_ocr_models.py
+ADD worker/download_ocr_models.py /app/
+RUN python /app/download_ocr_models.py
 
-CMD ["faststream", "run", "worker.src.app:app", "--workers", "3"]
+
+WORKDIR /app/
+ADD redbox-core/ /app/redbox-core
+ADD README.md /app/README.md
+ADD worker/ /app/worker
+
+ADD worker/health.sh /app/
+RUN chmod +x /app/health.sh
+
+CMD ["faststream", "run", "worker.src.app:app", "--workers", "1"]

@@ -140,11 +140,15 @@ class Settings(BaseSettings):
     azure_openai_endpoint: str | None = None
 
     openai_api_version: str = "2023-12-01-preview"
+    azure_api_version_embeddings: str = "2024-02-01"
     azure_openai_model: str = "azure/gpt-35-turbo-16k"
-    azure_embedding_model: str = "text-embedding-ada-002"
+    azure_embedding_model: str = "text-embedding-3-large"
     llm_max_tokens: int = 1024
 
-    embedding_max_retries: int = 4
+    embedding_max_retries: int = 10
+    embedding_retry_min_seconds: int = 10
+    embedding_retry_max_seconds: int = 120
+    embedding_max_batch_size: int = 512
     embedding_document_field_name: str = "embedding"
 
     partition_strategy: Literal["auto", "fast", "ocr_only", "hi_res"] = "fast"

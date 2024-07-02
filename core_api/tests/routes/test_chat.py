@@ -11,6 +11,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompt_values import ChatPromptValue
 from langchain_core.runnables import Runnable, RunnableLambda
 from langchain_core.runnables.schema import StreamEvent
+from semantic_router.encoders import TfidfEncoder
 from starlette.websockets import WebSocketDisconnect
 
 from core_api.src import dependencies, semantic_routes
@@ -70,13 +71,21 @@ def mock_all_chunks_retriever(alice):
     return RunnableLambda(lambda _: docs)
 
 
-@pytest.fixture()
+def mock_semantic_route_encoder():
+    encoder = TfidfEncoder()
+    routes = semantic_routes.get_semantic_routes()
+    encoder.fit(routes)
+    return encoder
+
+
+@pytest.fixture(scope="session")
 def mock_client(alice):
     chat_app.dependency_overrides[dependencies.get_llm] = mock_get_llm([RAG_LLM_RESPONSE] * 32)
     chat_app.dependency_overrides[dependencies.get_all_chunks_retriever] = lambda: mock_all_chunks_retriever(alice)
     chat_app.dependency_overrides[dependencies.get_parameterised_retriever] = lambda: mock_parameterised_retriever(
         alice
     )
+    chat_app.dependency_overrides[semantic_routes.get_semantic_routing_encoder] = mock_semantic_route_encoder
     yield TestClient(application)
     chat_app.dependency_overrides = {}
 
@@ -138,7 +147,7 @@ def test_summary(mock_client, headers):
         headers=headers,
         json={
             "message_history": [
-                {"text": "Summarise the provided docs?", "role": "user"},
+                {"text": "Summarise the documents", "role": "user"},
             ],
             "selected_files": [{"uuid": UPLOADED_FILE_UUID}],
         },

@@ -6,6 +6,7 @@ locals {
   core_api_environment_variables = merge(
     local.worker_environment_variables,
     {
+      "EMBEDDING_DOCUMENT_FIELD_NAME": var.embedding_document_field_name,
       "OPENAI_API_VERSION" : var.openai_api_version,
       "AZURE_OPENAI_MODEL" : var.azure_openai_model,
       "AI__CONTEXT_WINDOW_SIZE" : var.context_window_size,
@@ -44,6 +45,10 @@ locals {
   }
 
   worker_environment_variables = {
+    "EMBEDDING_DOCUMENT_FIELD_NAME": var.embedding_document_field_name,
+    "EMBEDDING_MAX_RETRIES": var.embedding_max_retries,
+    "EMBEDDING_RETRY_MIN_SECONDS": var.embedding_retry_min_seconds,
+    "EMBEDDING_RETRY_MAX_SECONDS": var.embedding_retry_max_seconds,
     "ELASTIC_ROOT_INDEX" : "redbox-data-${terraform.workspace}",
     "BUCKET_NAME" : aws_s3_bucket.user_data.bucket,
     "OBJECT_STORE" : "s3",
@@ -77,6 +82,8 @@ locals {
   worker_secrets = {
     "ELASTIC__API_KEY" : var.elastic_api_key,
     "ELASTIC__CLOUD_ID" : var.cloud_id,
+    "AZURE_OPENAI_API_KEY" : var.azure_openai_api_key,
+    "AZURE_OPENAI_ENDPOINT" : var.azure_openai_endpoint,
   }
 
   reconstructed_worker_secrets = [for k, _ in local.worker_secrets : { name = k, valueFrom = "${aws_secretsmanager_secret.worker-secret.arn}:${k}::" }]

@@ -7,15 +7,14 @@ import tiktoken
 from elasticsearch import Elasticsearch
 from fastapi import Depends
 from langchain_community.chat_models import ChatLiteLLM
-from langchain_community.embeddings import SentenceTransformerEmbeddings
 from langchain_core.embeddings import Embeddings
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.runnables import ConfigurableField
 from langchain_elasticsearch import ApproxRetrievalStrategy, ElasticsearchStore
+from langchain_openai.embeddings import AzureOpenAIEmbeddings
 
 from core_api.src.callbacks import LoggerCallbackHandler
 from core_api.src.retriever import AllElasticsearchRetriever, ParameterisedElasticsearchRetriever
-from redbox.model_db import MODEL_PATH
 from redbox.models import Settings
 from redbox.storage import ElasticsearchStorageHandler
 
@@ -35,9 +34,14 @@ def get_elasticsearch_client(env: Annotated[Settings, Depends(get_env)]) -> Elas
 
 @lru_cache(1)
 def get_embedding_model(env: Annotated[Settings, Depends(get_env)]) -> Embeddings:
-    embedding_model = SentenceTransformerEmbeddings(model_name=env.embedding_model, cache_folder=MODEL_PATH)
-    log.info("Loaded embedding model from environment: %s", env.embedding_model)
-    return embedding_model
+    return AzureOpenAIEmbeddings(
+        azure_endpoint=env.azure_openai_endpoint,
+        api_version=env.azure_api_version_embeddings,
+        model=env.azure_embedding_model,
+        max_retries=env.embedding_max_retries,
+        retry_min_seconds=4,
+        retry_max_seconds=30,
+    )
 
 
 @lru_cache(1)
@@ -66,7 +70,7 @@ def get_vector_store(
         index_name=f"{env.elastic_root_index}-chunk",
         embedding=get_embedding_model(env),
         strategy=strategy,
-        vector_query_field="embedding",
+        vector_query_field=env.embedding_document_field_name,
     )
 
 
@@ -92,6 +96,7 @@ def get_parameterised_retriever(
         index_name=f"{env.elastic_root_index}-chunk",
         params=default_params,
         embedding_model=get_embedding_model(env),
+        embedding_field_name=env.embedding_document_field_name,
     ).configurable_fields(
         params=ConfigurableField(
             id="params", name="Retriever parameters", description="A dictionary of parameters to use for the retriever."

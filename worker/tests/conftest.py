@@ -4,7 +4,8 @@ from uuid import uuid4
 import pytest
 from botocore.exceptions import ClientError
 from elasticsearch import Elasticsearch
-from sentence_transformers import SentenceTransformer
+from langchain_core.embeddings import Embeddings
+from langchain_core.embeddings.fake import FakeEmbeddings
 
 from redbox.models import Chunk, EmbedQueueItem, File
 from redbox.storage import ElasticsearchStorageHandler
@@ -32,8 +33,8 @@ def es_client() -> Elasticsearch:
 
 
 @pytest.fixture()
-def embedding_model() -> SentenceTransformer:
-    return SentenceTransformer(env.embedding_model)
+def embedding_model() -> Embeddings:
+    return FakeEmbeddings(size=3072)
 
 
 @pytest.fixture(scope="session")

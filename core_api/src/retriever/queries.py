@@ -46,12 +46,14 @@ def get_all(query: ESQuery) -> dict[str, Any]:
             }
         )
     return {
-        "_source": {"excludes": ["embedding"]},
+        "_source": {"excludes": ["*embedding"]},
         "query": {"bool": {"must": {"match_all": {}}, "filter": query_filter}},
     }
 
 
-def get_some(embedding_model: Embeddings, params: ESParams, query: ESQuery) -> dict[str, Any]:
+def get_some(
+    embedding_model: Embeddings, params: ESParams, embedding_field_name: str, query: ESQuery
+) -> dict[str, Any]:
     vector = embedding_model.embed_query(query["question"])
 
     query_filter = [
@@ -92,7 +94,7 @@ def get_some(embedding_model: Embeddings, params: ESParams, query: ESQuery) -> d
                     },
                     {
                         "knn": {
-                            "field": "embedding",
+                            "field": embedding_field_name,
                             "query_vector": vector,
                             "num_candidates": params["num_candidates"],
                             "filter": query_filter,

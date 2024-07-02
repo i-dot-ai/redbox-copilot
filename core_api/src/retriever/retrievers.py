@@ -26,6 +26,7 @@ def hit_to_doc(hit: dict[str, Any]) -> Document:
 class ParameterisedElasticsearchRetriever(ElasticsearchRetriever):
     params: ESParams
     embedding_model: Embeddings
+    embedding_field_name: str = "embedding"
 
     def __init__(self, **kwargs: Any) -> None:
         # Hack to pass validation before overwrite
@@ -33,7 +34,7 @@ class ParameterisedElasticsearchRetriever(ElasticsearchRetriever):
         kwargs["body_func"] = get_some
         kwargs["document_mapper"] = hit_to_doc
         super().__init__(**kwargs)
-        self.body_func = partial(get_some, self.embedding_model, self.params)
+        self.body_func = partial(get_some, self.embedding_model, self.params, self.embedding_field_name)
 
 
 class AllElasticsearchRetriever(ElasticsearchRetriever):

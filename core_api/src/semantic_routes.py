@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends
 from langchain_core.runnables import Runnable
 from semantic_router import Route
-from semantic_router.encoders import HuggingFaceEncoder
+from semantic_router.encoders import AzureOpenAIEncoder, BaseEncoder
 from semantic_router.layer import RouteLayer
 
 from core_api.src.build_chains import (
@@ -12,7 +12,8 @@ from core_api.src.build_chains import (
     build_summary_chain,
     build_vanilla_chain,
 )
-from redbox.model_db import MODEL_PATH
+from core_api.src.dependencies import get_env
+from redbox.models import Settings
 from redbox.models.chat import ChatRoute
 
 # === Pre-canned responses for non-LLM routes ===
@@ -75,6 +76,7 @@ coach = Route(
 gratitude = Route(
     name=ChatRoute.gratitude.value,
     utterances=[
+        "Thank you",
         "Thank you ever so much for your help!",
         "I'm really grateful for your assistance.",
         "Cheers for the detailed response!",
@@ -87,6 +89,7 @@ gratitude = Route(
 summarisation = Route(
     name=ChatRoute.summarise.value,
     utterances=[
+        "Summarise the documents",
         "I'd like to summarise the documents I've uploaded.",
         "Can you help me with summarising these documents?",
         "Please summarise the documents with a focus on the impact on northern England",
@@ -137,7 +140,6 @@ vanilla = Route(
     ],
 )
 
-__semantic_routing_encoder = None
 __routable_chains = None
 __semantic_route_layer = None
 
@@ -146,20 +148,22 @@ def get_semantic_routes():
     return (info, ability, coach, gratitude, summarisation, vanilla)
 
 
-def get_semantic_routing_encoder():
-    global __semantic_routing_encoder  # noqa: PLW0603
-    if not __semantic_routing_encoder:
-        __semantic_routing_encoder = HuggingFaceEncoder(
-            name="sentence-transformers/paraphrase-albert-small-v2",
-            cache_dir=MODEL_PATH,
-        )
-    return __semantic_routing_encoder
+def get_semantic_routing_encoder(env: Annotated[Settings, Depends(get_env)]):
+    return AzureOpenAIEncoder(
+        azure_endpoint=env.azure_openai_endpoint, api_version="2023-05-15", model=env.azure_embedding_model
+    )
 
 
-def get_semantic_route_layer(routes: Annotated[list[Route], Depends(get_semantic_routes)]):
+def get_semantic_route_layer(
+    routes: Annotated[list[Route], Depends(get_semantic_routes)],
+    encoder: Annotated[BaseEncoder, Depends(get_semantic_routing_encoder)],
+):
+    """
+    Manual singleton creation as lru_cache can't handle the semantic router classes (non hashable)
+    """
     global __semantic_route_layer  # noqa: PLW0603
     if not __semantic_route_layer:
-        __semantic_route_layer = RouteLayer(encoder=get_semantic_routing_encoder(), routes=routes)
+        __semantic_route_layer = RouteLayer(encoder=encoder, routes=routes)
     return __semantic_route_layer
 
 
