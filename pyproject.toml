@@ -36,6 +36,11 @@ uvicorn = "^0.30.1"
 python-multipart = "^0.0.9"
 python-jose = "^3.3.0"
 websockets = "^12.0"
+anthropic = "^0.30.0"
+litellm = "^1.41.2"
+openai = "^1.35.7"
+langchain-community = "^0.2.6"
+
 
 [tool.poetry.group.dev.dependencies]
 bumpversion = "^0.6.0"
@@ -67,11 +72,6 @@ pytest-playwright = "^0.5"
 axe-playwright-python = "^0.1"
 dj-notebook = "^0.7.0"
 
-[tool.poetry.group.ai.dependencies]
-anthropic = "^0.30.0"
-litellm = "^1.41.2"
-openai = "^1.35.7"
-langchain-community = "^0.2.6"
 
 
 [tool.poetry.group.docs.dependencies]
