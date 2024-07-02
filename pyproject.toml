@@ -13,6 +13,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
 redbox = {path="redbox-core", develop=true}
+worker = {path="worker", develop=true}
 pydantic = "^2.7.1"
 elasticsearch = "^8.14.0"
 langchain = "^0.2.6"
