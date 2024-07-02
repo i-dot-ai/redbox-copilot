@@ -1,0 +1,33 @@
+[tool.ruff]
+line-length = 120
+target-version = 'py311'
+
+[tool.poetry]
+name = "worker"
+version = "0.3.0"
+description = "RAG application that uses GenAI to chat with and summarise civil service documents"
+authors = ["i.AI <i-dot-ai-enquiries@cabinetoffice.gov.uk>"]
+license = "MIT"
+readme = "../README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+redbox = {path="../redbox-core", develop=true}
+opencv-python-headless = "^4.10.0.84"
+nltk = "^3.8.1"
+langchain-community = "^0.2.6"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+pytest-cov = "^5.0.0"
+mypy = "^1.9.0"
+pytest-asyncio = "^0.23.6"
+boto3-stubs = {extras = ["essential"], version = "^1.34.137"}
+moto = {extras = ["s3"], version = "^5.0.10"}
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

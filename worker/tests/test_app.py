@@ -6,7 +6,7 @@ from faststream.redis import TestApp, TestRedisBroker
 
 from redbox.models.file import File
 from redbox.storage import ElasticsearchStorageHandler
-from worker.src.app import app, broker, env
+from worker.app import app, broker, env
 
 
 @pytest.mark.asyncio()
