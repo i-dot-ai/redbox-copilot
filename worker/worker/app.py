@@ -15,7 +15,7 @@ from langchain_elasticsearch.vectorstores import ElasticsearchStore
 
 from redbox.models import File, ProcessingStatusEnum, Settings
 from redbox.storage.elasticsearch import ElasticsearchStorageHandler
-from worker.src.loader import UnstructuredDocumentLoader
+from worker.loader import UnstructuredDocumentLoader
 
 if TYPE_CHECKING:
     from mypy_boto3_s3.client import S3Client

@@ -34,7 +34,7 @@ rebuild: stop prune ## Rebuild all images
 
 .PHONY: test-core-api
 test-core-api: ## Test core-api
-	poetry install --no-root --no-ansi --with api,dev,ai --without worker,docs
+	poetry install --no-root --no-ansi --with api,dev --without docs
 	poetry run pytest core_api/tests --cov=core_api/src -v --cov-report=term-missing --cov-fail-under=75
 
 .PHONY: test-redbox
@@ -44,8 +44,9 @@ test-redbox: ## Test redbox
 
 .PHONY: test-worker
 test-worker: ## Test worker
-	poetry install --no-root --no-ansi --with worker,dev --without ai,api,docs
-	poetry run pytest worker/tests --cov=worker -v --cov-report=term-missing --cov-fail-under=40
+	cp .env.test redbox-core/.env
+	cd worker && poetry install && poetry run pytest --cov=worker -v --cov-report=term-missing --cov-fail-under=80
+
 
 .PHONY: test-django
 test-django: stop ## Test django-app
@@ -57,7 +58,7 @@ test-integration: rebuild run test-integration-without-build ## Run all integrat
 
 .PHONY: test-integration-without-build
 test-integration-without-build : ## Run all integration tests without rebuilding
-	poetry install --no-root --no-ansi --with dev --without ai,api,worker,docs
+	poetry install --no-root --no-ansi --with dev --without api,docs
 	poetry run pytest tests/
 
 .PHONY: collect-static
@@ -83,7 +84,7 @@ safe:  ##
 
 .PHONY: checktypes
 checktypes:  ## Check types in redbox and worker
-	poetry run mypy worker --ignore-missing-imports --no-incremental
+	cd worker && poetry install && poetry run mypy . --ignore-missing-imports
 	cd redbox-core && poetry install && poetry run mypy . --ignore-missing-imports
 
 .PHONY: check-migrations

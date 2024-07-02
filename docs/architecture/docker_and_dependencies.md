@@ -10,7 +10,7 @@ We use Poetry to manage the dependencies for each of the Microservices. Poetry i
 For example, the `api` Microservice has the following groups:
 
 ```bash
-poetry install --no-root --no-ansi --with api --without ai,worker,dev
+poetry install --no-root --no-ansi --with api --without ai,dev
 ```
 
 !!! warning "Be explicit with poetry groups"

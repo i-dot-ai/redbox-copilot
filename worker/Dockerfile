@@ -13,7 +13,7 @@ ADD redbox-core /app/redbox-core
 ADD download_embedder.py /app/
 ADD README.md /app/README.md
 
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root --no-ansi --with worker,api --without ai,dev
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-ansi
 
 FROM python:3.11-slim-buster as runtime
 RUN apt update && apt-get install -y \
@@ -50,4 +50,4 @@ RUN python -m nltk.downloader averaged_perceptron_tagger
 # Download the OCR models
 RUN python download_ocr_models.py
 
-CMD ["faststream", "run", "worker.src.app:app", "--workers", "3"]
+CMD ["faststream", "run", "worker.app:app", "--workers", "3"]
