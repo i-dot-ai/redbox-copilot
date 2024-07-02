@@ -8433,7 +8433,6 @@ body:has(.iai-environment-warning) main {
 .iai-chat-bubble__route {
   font-size: 0.625rem;
   line-height: 0.825rem;
-  display: none;
 }
 
 .iai-chat-bubble__sources-heading, .iai-chat-bubbles__sources-link {

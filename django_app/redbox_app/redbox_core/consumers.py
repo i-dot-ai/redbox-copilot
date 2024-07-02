@@ -112,10 +112,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return response.data
 
     async def handle_route(self, response: CoreChatResponse, show_route: bool) -> str:
-        # TODO(@rachaelcodes): remove is_staff conditional with new route design
+        # TODO(@rachaelcodes): remove is_staff conditional and hidden-route with new route design
         # https://technologyprogramme.atlassian.net/browse/REDBOX-419
         if show_route:
             await self.send_to_client("route", response.data)
+        else:
+            await self.send_to_client("hidden-route", response.data)
         return response.data
 
     async def send_to_client(self, message_type: str, data: str | Mapping[str, Any] | None = None) -> None:
