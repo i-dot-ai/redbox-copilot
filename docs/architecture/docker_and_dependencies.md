@@ -28,7 +28,7 @@ We use multi-stage builds to keep the size of our Docker containers small. This 
 
 ```Dockerfile
 # BUILDER
-FROM python:3.12-bookworm as builder
+FROM python:3.11-bookworm as builder
 
 WORKDIR /app/
 
@@ -43,7 +43,7 @@ RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install
 
 # RUNNER
 
-FROM python:3.12-slim-buster as runtime
+FROM python:3.11-slim-buster as runtime
 
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"

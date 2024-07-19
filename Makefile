@@ -189,15 +189,15 @@ docker_echo:
 	echo $($(value))
 
 ifeq ($(instance),postgres)
- CONFIG_DIR=../../../../redbox-copilot-infra-config
- tf_build_args=
+  CONFIG_DIR=../../../../redbox-copilot-infra-config
+  tf_build_args=
 else ifeq ($(instance),universal)
- CONFIG_DIR=../../../../redbox-copilot-infra-config
- env=prod
- tf_build_args=
+  CONFIG_DIR=../../../../redbox-copilot-infra-config
+  env=prod
+  tf_build_args=
 else
- CONFIG_DIR=../../../redbox-copilot-infra-config
- tf_build_args=-var "image_tag=$(IMAGE_TAG)"
+  CONFIG_DIR=../../../redbox-copilot-infra-config
+  tf_build_args=-var "image_tag=$(IMAGE_TAG)"
 endif
 
 TF_BACKEND_CONFIG=$(CONFIG_DIR)/backend.hcl

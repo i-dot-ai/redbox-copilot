@@ -1,4 +1,4 @@
-FROM python:3.12-bookworm as builder
+FROM python:3.11-bookworm as builder
 
 RUN apt update && apt-get install -y \
     poppler-utils \
@@ -30,7 +30,7 @@ RUN poetry run python -m nltk.downloader averaged_perceptron_tagger
 COPY worker/download_ocr_models.py .
 RUN poetry run python -m download_ocr_models
 
-FROM python:3.12-slim-bookworm as runtime
+FROM python:3.11-slim-bookworm as runtime
 
 ENV VIRTUAL_ENV=/app/worker/.venv \
     PATH="/app/worker/.venv/bin:$PATH"

@@ -14,7 +14,7 @@ RUN npx parcel build
 
 
 # poetry
-FROM python:3.12-slim AS poetry-packages
+FROM python:3.11-slim AS poetry-packages
 
 RUN apt-get update && apt-get install --yes build-essential > /dev/null
 
@@ -32,7 +32,7 @@ RUN poetry bundle venv ./venv
 
 
 # app
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 RUN apt-get update && apt-get install --yes libpq-dev curl > /dev/null
 

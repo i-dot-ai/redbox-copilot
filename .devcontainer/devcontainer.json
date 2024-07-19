@@ -1,5 +1,5 @@
 {
-  "image": "python:3.12-bookworm",
+  "image": "python:3.11-bookworm",
   "postCreateCommand": "pip3 install poetry && apt update && apt install libgl-dev libmagic-dev docker-ce  -y && poetry install && chmod 777 data/elastic",
   "name": "redbox-dev",
   "features": {

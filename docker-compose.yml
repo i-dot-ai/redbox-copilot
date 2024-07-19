@@ -43,7 +43,7 @@ services:
       retries: 24
       start_period: 30s
   requirements:
-    image: python:3.12
+    image: python:3.11
     profiles:
       - utils
     volumes:

@@ -11,7 +11,7 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.12,<3.13"
+python = ">=3.11,<3.11"
 
 [tool.poetry.group.dev.dependencies]
 bumpversion = "^0.6.0"

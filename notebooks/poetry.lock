@@ -1294,7 +1294,7 @@ name = "core-api"
 version = "0.4.0"
 description = "RAG application that uses GenAI to chat with and summarise civil service documents"
 optional = false
-python-versions = ">=3.12,<3.13"
+python-versions = ">=3.11,<3.12"
 files = []
 develop = true
 
@@ -6771,7 +6771,7 @@ name = "redbox"
 version = "0.4.0"
 description = "RAG application that uses GenAI to chat with and summarise civil service documents"
 optional = false
-python-versions = ">=3.12,<3.13"
+python-versions = ">=3.11,<3.12"
 files = []
 develop = true
 
@@ -6795,7 +6795,7 @@ name = "redbox-app"
 version = "0.1.0"
 description = ""
 optional = false
-python-versions = ">=3.12,<3.13"
+python-versions = ">=3.11,<3.12"
 files = []
 develop = true
 
@@ -9271,7 +9271,7 @@ name = "worker"
 version = "0.3.0"
 description = "RAG application that uses GenAI to chat with and summarise civil service documents"
 optional = false
-python-versions = ">=3.12,<3.13"
+python-versions = ">=3.11,<3.12"
 files = []
 develop = true
 
@@ -9584,5 +9584,5 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.12,<3.13"
+python-versions = ">=3.11,<3.12"
 content-hash = "cfa39f9353073d5c41fc5b25991cd03d81a9a95af3467c6411a20ee8d5c1fdaa"

@@ -4510,7 +4510,7 @@ name = "redbox"
 version = "0.4.0"
 description = "RAG application that uses GenAI to chat with and summarise civil service documents"
 optional = false
-python-versions = ">=3.12,<3.13"
+python-versions = ">=3.11,<3.12"
 files = []
 develop = true
 
@@ -6088,5 +6088,5 @@ multidict = ">=4.0"
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.12,<3.13"
+python-versions = ">=3.11,<3.12"
 content-hash = "18cae4498925624e6eaa71c5d7b2a6b37da59f512c9af5c6e467fcb6f5198a78"

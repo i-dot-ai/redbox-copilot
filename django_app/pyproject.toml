@@ -6,7 +6,7 @@ authors = ["i.AI <i-dot-ai-enquiries@cabinetoffice.gov.uk>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.12,<3.13"
+python = ">=3.11,<3.12"
 django = "^5.0.7"
 django-compressor = "^4.4"
 django-libsass = "^0.9"
