@@ -1,4 +1,4 @@
-FROM python:3.12-bookworm as builder
+FROM python:3.11-bookworm as builder
 
 RUN apt-get update && apt-get install --yes build-essential curl > /dev/null
 
@@ -17,8 +17,7 @@ COPY README.md /app/README.md
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
-FROM python:3.12-slim-bookworm as runtime
-
+FROM python:3.11-slim-bookworm as runtime
 
 ENV VIRTUAL_ENV=/app/core-api/.venv \
     PATH="/app/core-api/.venv/bin:$PATH"
@@ -28,7 +27,6 @@ COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 WORKDIR /app/core-api
 
 # Add redbox python package and install it with poetry
-ADD redbox-core/ /app/redbox-core
 ADD core-api/ /app/core-api
 
 # Run FastAPI
