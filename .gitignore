@@ -218,4 +218,6 @@ django_app/tests/staticfiles
 # lambda files
 infrastructure/aws/cleanup_lambda/*.zip
 infrastructure/aws/cleanup_lambda/layer/*
+infrastructure/aws/regen_embeddings_lambda/*.zip
+infrastructure/aws/regen_embeddings_lambda/layer/*
 
