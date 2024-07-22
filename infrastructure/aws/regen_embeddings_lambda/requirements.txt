@@ -1,0 +1,7 @@
+certifi==2024.7.4
+elasticsearch==8.14.0
+elastic-transport==8.13.1
+pg8000
+requests
+urllib3==2.2.2
+typing-extensions==4.12.2
