@@ -353,3 +353,9 @@ variable "summarisation_chunk_max_tokens" {
   default     = 20000
   description = "Maximum size (in tokens) of chunk used in summarisation"
 }
+
+variable "django_command" {
+  type        = string
+  default     = "delete_expired_data"
+  description = "Name of Django management to be run. Use with caution"
+}

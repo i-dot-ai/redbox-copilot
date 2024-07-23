@@ -109,6 +109,35 @@ module "django-app" {
 }
 
 
+module "django-command" {
+  memory                     = 512
+  cpu                        = 216
+  create_listener            = false
+  create_networking          = false
+  source                     = "../../../i-ai-core-infrastructure//modules/ecs"
+  name                       = "${local.name}-django-command-${var.command}"
+  image_tag                  = var.image_tag
+  command                    = ["python", "manage.py", var.django_command]
+  ecr_repository_uri         = "${var.ecr_repository_uri}/${var.project_name}-django-command"
+  ecs_cluster_id             = module.cluster.ecs_cluster_id
+  ecs_cluster_name           = module.cluster.ecs_cluster_name
+  autoscaling_minimum_target = 1
+  autoscaling_maximum_target = 3
+  state_bucket               = var.state_bucket
+  vpc_id                     = data.terraform_remote_state.vpc.outputs.vpc_id
+  private_subnets            = data.terraform_remote_state.vpc.outputs.private_subnets
+  container_port             = 8091
+    load_balancer_security_group = module.load_balancer.load_balancer_security_group_id
+  aws_lb_arn                   = module.load_balancer.alb_arn
+  host                         = local.django_host
+  ip_whitelist                 = var.external_ips
+  environment_variables        = local.django_app_environment_variables
+  secrets                      = local.reconstructed_django_secrets
+  http_healthcheck             = false
+  ephemeral_storage            = 30
+}
+
+
 module "core_api" {
   service_discovery_service_arn = aws_service_discovery_service.service_discovery_service.arn
   memory                        = 4096
