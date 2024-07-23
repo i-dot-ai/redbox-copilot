@@ -21,7 +21,7 @@ boto3 = "^1.34.136"
 pydantic-settings = "^2.3.4"
 torch = "2.2.2"
 langchain-elasticsearch = "^0.2.2"
-
+pandas = "^2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"

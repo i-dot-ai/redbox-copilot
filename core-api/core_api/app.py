@@ -13,6 +13,8 @@ from core_api.routes.file import file_app
 from redbox import __version__ as redbox_version
 from redbox.models import Settings, StatusResponse
 
+print('Lewis is testing')
+
 # === Logging ===
 
 logging.basicConfig(level=logging.INFO)

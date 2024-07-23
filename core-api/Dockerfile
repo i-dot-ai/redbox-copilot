@@ -1,4 +1,4 @@
-FROM python:3.12-bookworm as builder
+FROM python:3.12-slim-bookworm AS builder
 
 RUN apt-get update && apt-get install --yes build-essential curl > /dev/null
 
