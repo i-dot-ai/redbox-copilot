@@ -3,7 +3,7 @@ services:
     image: django-app:latest
     build:
       context: .
-      dockerfile: ./django_app/Dockerfile
+      dockerfile: ./django-app/Dockerfile
     depends_on:
       db:
         condition: service_healthy
@@ -16,8 +16,8 @@ services:
     env_file:
       - .env
     volumes:
-      - /app/django_app/frontend/node_modules
-      - ./django_app:/app/django_app/
+      - /app/django-app/frontend/node_modules
+      - ./django-app:/app/django-app/
     ports:
       - "8090:8090"
     healthcheck:

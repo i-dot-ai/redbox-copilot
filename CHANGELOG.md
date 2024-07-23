@@ -1,6 +1,7 @@
 # version v0.3.0
 
 
+<<<<<<< HEAD
 * [#605](https://github.com/i-dot-ai/redbox/pull/605): bugfix/build-fix
 * [#604](https://github.com/i-dot-ai/redbox/pull/604): Run integration and build on push to main
 * [#603](https://github.com/i-dot-ai/redbox/pull/603): Bump pikepdf from 8.15.1 to 9.0.0
@@ -260,6 +261,267 @@
 * [#225](https://github.com/i-dot-ai/redbox/pull/225): Feature/redbox 140 finalize file model
 * [#224](https://github.com/i-dot-ai/redbox/pull/224): bugfix/implicit single connection
 * [#222](https://github.com/i-dot-ai/redbox/pull/222): Bugfix/ruff not checking code
+=======
+* [#605](https://github.com/i-dot-ai/redbox-copilot/pull/605): bugfix/build-fix
+* [#604](https://github.com/i-dot-ai/redbox-copilot/pull/604): Run integration and build on push to main
+* [#603](https://github.com/i-dot-ai/redbox-copilot/pull/603): Bump pikepdf from 8.15.1 to 9.0.0
+* [#602](https://github.com/i-dot-ai/redbox-copilot/pull/602): Bump sentence-transformers from 2.7.0 to 3.0.1
+* [#601](https://github.com/i-dot-ai/redbox-copilot/pull/601): Bump the minor-patch group with 19 updates
+* [#600](https://github.com/i-dot-ai/redbox-copilot/pull/600): Bump urllib3 from 2.2.1 to 2.2.2 in /django-app in the pip group across 1 directory
+* [#598](https://github.com/i-dot-ai/redbox-copilot/pull/598): Patches for streaming
+* [#597](https://github.com/i-dot-ai/redbox-copilot/pull/597): EN-28 - AWS tagging updates
+* [#596](https://github.com/i-dot-ai/redbox-copilot/pull/596): Refactored the chat app to be fastapi dependency based
+* [#595](https://github.com/i-dot-ai/redbox-copilot/pull/595): Create loading ellipsis animation and show until streaming complete
+* [#594](https://github.com/i-dot-ai/redbox-copilot/pull/594): feature/inject-prompts
+* [#592](https://github.com/i-dot-ai/redbox-copilot/pull/592): bugfix/test-summarisation
+* [#590](https://github.com/i-dot-ai/redbox-copilot/pull/590): Bump mlflow from 2.12.2 to 2.13.2 in /mlflow in the pip group across 1 directory
+* [#587](https://github.com/i-dot-ai/redbox-copilot/pull/587): Feature/redbox 362 rag runnable
+* [#585](https://github.com/i-dot-ai/redbox-copilot/pull/585): Use rb- prefix for Redbox-specific styles
+* [#584](https://github.com/i-dot-ai/redbox-copilot/pull/584): Update REST `rag_chat` endpoint to include the stuff summarisation already in streaming endpoint
+* [#583](https://github.com/i-dot-ai/redbox-copilot/pull/583): REDBOX 257 - User demographic data
+* [#582](https://github.com/i-dot-ai/redbox-copilot/pull/582): Update RAG prompt to remove duplicate sources heading
+* [#580](https://github.com/i-dot-ai/redbox-copilot/pull/580): Working condense RAG runnable
+* [#578](https://github.com/i-dot-ai/redbox-copilot/pull/578): REDBOX-337 Non-streamed chat file selection
+* [#576](https://github.com/i-dot-ai/redbox-copilot/pull/576): Increase token limit
+* [#575](https://github.com/i-dot-ai/redbox-copilot/pull/575): Feature/stop streaming
+* [#571](https://github.com/i-dot-ai/redbox-copilot/pull/571): Feature/split rds postgres
+* [#570](https://github.com/i-dot-ai/redbox-copilot/pull/570): Added summarisation to core api [rebase 2]
+* [#568](https://github.com/i-dot-ai/redbox-copilot/pull/568): Make chat-history and doc-selection scrollable
+* [#567](https://github.com/i-dot-ai/redbox-copilot/pull/567): Feature/dev deployment
+* [#566](https://github.com/i-dot-ai/redbox-copilot/pull/566): Only show docs on chat page where processing is complete
+* [#565](https://github.com/i-dot-ai/redbox-copilot/pull/565): REDBOX-337 - Tests for chat file selection
+* [#564](https://github.com/i-dot-ai/redbox-copilot/pull/564): Feature/capture chunks
+* [#562](https://github.com/i-dot-ai/redbox-copilot/pull/562): Turning condensed prompt RAG into a runnable function
+* [#561](https://github.com/i-dot-ai/redbox-copilot/pull/561): Feature/move secrets to secrets manager
+* [#560](https://github.com/i-dot-ai/redbox-copilot/pull/560): Turning chat into a runnable function
+* [#557](https://github.com/i-dot-ai/redbox-copilot/pull/557): Show ChatMessage date in admin
+* [#556](https://github.com/i-dot-ai/redbox-copilot/pull/556): REDBOX 337 chat file selection
+* [#555](https://github.com/i-dot-ai/redbox-copilot/pull/555): Add Plausible to CSP connect-src
+* [#554](https://github.com/i-dot-ai/redbox-copilot/pull/554): Turning RAG into a runnable function
+* [#551](https://github.com/i-dot-ai/redbox-copilot/pull/551): bugfix/integration-test-rag-question
+* [#550](https://github.com/i-dot-ai/redbox-copilot/pull/550): feature/clustering-on
+* [#548](https://github.com/i-dot-ai/redbox-copilot/pull/548): Feature/naming conventions
+* [#545](https://github.com/i-dot-ai/redbox-copilot/pull/545): Fix check-status
+* [#543](https://github.com/i-dot-ai/redbox-copilot/pull/543): Save non-rag responses to DB - tactical fix.
+* [#542](https://github.com/i-dot-ai/redbox-copilot/pull/542): Remove streaming demo
+* [#540](https://github.com/i-dot-ai/redbox-copilot/pull/540): Feature/semantic routing
+* [#539](https://github.com/i-dot-ai/redbox-copilot/pull/539): Created basic stuff document runnable creation function
+* [#538](https://github.com/i-dot-ai/redbox-copilot/pull/538): Add eval results visualisation and calculate uncertainty
+* [#537](https://github.com/i-dot-ai/redbox-copilot/pull/537): Enable chat streaming in all tests.
+* [#536](https://github.com/i-dot-ai/redbox-copilot/pull/536): Download Chat Histories
+* [#534](https://github.com/i-dot-ai/redbox-copilot/pull/534): Feature/add sentry
+* [#533](https://github.com/i-dot-ai/redbox-copilot/pull/533): Updated verification email to reflect session timeout and product name
+* [#532](https://github.com/i-dot-ai/redbox-copilot/pull/532): Add functions to save and load embeddings
+* [#531](https://github.com/i-dot-ai/redbox-copilot/pull/531): bugfix/gpt4
+* [#530](https://github.com/i-dot-ai/redbox-copilot/pull/530): Don't show "this is not a live service" banner in prod.
+* [#529](https://github.com/i-dot-ai/redbox-copilot/pull/529): Run static checks on django-app changes.
+* [#528](https://github.com/i-dot-ai/redbox-copilot/pull/528): Use minio to get file url in integration
+* [#527](https://github.com/i-dot-ai/redbox-copilot/pull/527): Formatting
+* [#526](https://github.com/i-dot-ai/redbox-copilot/pull/526): Enable multi-file uploads
+* [#524](https://github.com/i-dot-ai/redbox-copilot/pull/524): Add health checks
+* [#523](https://github.com/i-dot-ai/redbox-copilot/pull/523): delete expired chats with management command
+* [#521](https://github.com/i-dot-ai/redbox-copilot/pull/521): Create default trusted-types policy
+* [#519](https://github.com/i-dot-ai/redbox-copilot/pull/519): Expt/can eval spot regression
+* [#518](https://github.com/i-dot-ai/redbox-copilot/pull/518): Delete expired files with management command
+* [#517](https://github.com/i-dot-ai/redbox-copilot/pull/517): Enable and fix final linting rules.
+* [#515](https://github.com/i-dot-ai/redbox-copilot/pull/515): Parameterises s3 client for worker and chunker
+* [#513](https://github.com/i-dot-ai/redbox-copilot/pull/513): Feature/auto release action
+* [#512](https://github.com/i-dot-ai/redbox-copilot/pull/512): Remove alpine.js
+* [#510](https://github.com/i-dot-ai/redbox-copilot/pull/510): Redraft the evaluation README
+* [#508](https://github.com/i-dot-ai/redbox-copilot/pull/508): fix prod deployment
+* [#507](https://github.com/i-dot-ai/redbox-copilot/pull/507): Added make command that will auto-deploy-to-dev by default, or any en…
+* [#506](https://github.com/i-dot-ai/redbox-copilot/pull/506): Removed all references to languages other than British English
+* [#505](https://github.com/i-dot-ai/redbox-copilot/pull/505): added video to README
+* [#503](https://github.com/i-dot-ai/redbox-copilot/pull/503): Build delete-doc E2E test
+* [#499](https://github.com/i-dot-ai/redbox-copilot/pull/499): feature/streaming-working-on-ecs
+* [#498](https://github.com/i-dot-ai/redbox-copilot/pull/498): Add tests for feedback buttons
+* [#497](https://github.com/i-dot-ai/redbox-copilot/pull/497): Bugfix/filter by exact UUID
+* [#496](https://github.com/i-dot-ai/redbox-copilot/pull/496): bugfix/csp-for-websockets
+* [#495](https://github.com/i-dot-ai/redbox-copilot/pull/495): Send message on enter key press
+* [#494](https://github.com/i-dot-ai/redbox-copilot/pull/494): Utilised autoscaling policy setup in ecs module
+* [#492](https://github.com/i-dot-ai/redbox-copilot/pull/492): Adds a RAG function so you don't need the endpoint
+* [#491](https://github.com/i-dot-ai/redbox-copilot/pull/491): Run e2e in cd pipeline
+* [#488](https://github.com/i-dot-ai/redbox-copilot/pull/488): Removed usage of LLM env variable in core-api chat.py and edited log …
+* [#487](https://github.com/i-dot-ai/redbox-copilot/pull/487): bugfix/get-openai-working-again
+* [#486](https://github.com/i-dot-ai/redbox-copilot/pull/486): Removed deleted files from documents list
+* [#485](https://github.com/i-dot-ai/redbox-copilot/pull/485): Feature/redbox 297 streaming redbox prompts
+* [#483](https://github.com/i-dot-ai/redbox-copilot/pull/483): Introduce linting rules tranche 5
+* [#482](https://github.com/i-dot-ai/redbox-copilot/pull/482): feature/separate-index-per-env
+* [#479](https://github.com/i-dot-ai/redbox-copilot/pull/479): Added email template link to negative chat feedback
+* [#478](https://github.com/i-dot-ai/redbox-copilot/pull/478): Add mlflow evaluation notebook [first draft]
+* [#477](https://github.com/i-dot-ai/redbox-copilot/pull/477): bug fix for simple_chat looks like it wasn't updated after a change in the output format
+* [#475](https://github.com/i-dot-ai/redbox-copilot/pull/475): Update docs page to match latest design
+* [#474](https://github.com/i-dot-ai/redbox-copilot/pull/474): Added env warning for non-prod envs and updated styles to match
+* [#473](https://github.com/i-dot-ai/redbox-copilot/pull/473): Move Plausible declaration
+* [#472](https://github.com/i-dot-ai/redbox-copilot/pull/472): feature/REDBOX-282-azure-ai-api-end-point
+* [#471](https://github.com/i-dot-ai/redbox-copilot/pull/471): Update homepage and sign-in content
+* [#470](https://github.com/i-dot-ai/redbox-copilot/pull/470): Redirect users from sign in link to the documents page
+* [#468](https://github.com/i-dot-ai/redbox-copilot/pull/468): Expt/prompt engineering
+* [#464](https://github.com/i-dot-ai/redbox-copilot/pull/464): Fix many type errors
+* [#462](https://github.com/i-dot-ai/redbox-copilot/pull/462): Add accessibility tests for info pages
+* [#459](https://github.com/i-dot-ai/redbox-copilot/pull/459): Bugfix/broken documents page test
+* [#457](https://github.com/i-dot-ai/redbox-copilot/pull/457): feature/daphene
+* [#454](https://github.com/i-dot-ai/redbox-copilot/pull/454): Feature/rag evaluation framework
+* [#453](https://github.com/i-dot-ai/redbox-copilot/pull/453): e2e and a11y tests
+* [#451](https://github.com/i-dot-ai/redbox-copilot/pull/451): Adds parameter for security classification
+* [#449](https://github.com/i-dot-ai/redbox-copilot/pull/449): Build fix.
+* [#448](https://github.com/i-dot-ai/redbox-copilot/pull/448): Feature/redbox 234 keep deleted file django reference
+* [#447](https://github.com/i-dot-ai/redbox-copilot/pull/447): Introduce linting rules tranche 4
+* [#446](https://github.com/i-dot-ai/redbox-copilot/pull/446): A working launch.json for Django in VSCode
+* [#445](https://github.com/i-dot-ai/redbox-copilot/pull/445): Readds sourcing to bring prompt performance back to where it was
+* [#442](https://github.com/i-dot-ai/redbox-copilot/pull/442): feature/restore-whitenoise
+* [#441](https://github.com/i-dot-ai/redbox-copilot/pull/441): Feature/introduce linting rules 3
+* [#440](https://github.com/i-dot-ai/redbox-copilot/pull/440): Restore feedback link
+* [#436](https://github.com/i-dot-ai/redbox-copilot/pull/436): Order chat by date
+* [#435](https://github.com/i-dot-ai/redbox-copilot/pull/435): Update file expiry with RAG chat
+* [#434](https://github.com/i-dot-ai/redbox-copilot/pull/434): Ensure feedback prompts are displayed as coming from Redbox (not User)
+* [#432](https://github.com/i-dot-ai/redbox-copilot/pull/432): feature/REDBOX-224-mechanism-to-manage-accounts
+* [#430](https://github.com/i-dot-ai/redbox-copilot/pull/430): bugfix/remove-sources-part-2
+* [#429](https://github.com/i-dot-ai/redbox-copilot/pull/429): Sorted documentsby created_at and added date field to documents page
+* [#428](https://github.com/i-dot-ai/redbox-copilot/pull/428): Add Plausible Code
+* [#427](https://github.com/i-dot-ai/redbox-copilot/pull/427): Change favicon to i.AI
+* [#426](https://github.com/i-dot-ai/redbox-copilot/pull/426): Rename Sessions to Chats
+* [#425](https://github.com/i-dot-ai/redbox-copilot/pull/425): Feature/redbox 234 Add file expiry date
+* [#424](https://github.com/i-dot-ai/redbox-copilot/pull/424): Add `lower` jinja2 pipe to check for document status on documents.html
+* [#423](https://github.com/i-dot-ai/redbox-copilot/pull/423): Improve UX for non-streamed responses
+* [#418](https://github.com/i-dot-ai/redbox-copilot/pull/418): bugfix/REDBOX-261-correctly-order-recent-sessions
+* [#417](https://github.com/i-dot-ai/redbox-copilot/pull/417): feature/REDBOX-260-order-document-view
+* [#415](https://github.com/i-dot-ai/redbox-copilot/pull/415): Remove download button
+* [#414](https://github.com/i-dot-ai/redbox-copilot/pull/414): bugfix/move-from-pubsub-to-fifo-arch
+* [#413](https://github.com/i-dot-ai/redbox-copilot/pull/413): Update doc status colour when complete
+* [#412](https://github.com/i-dot-ai/redbox-copilot/pull/412): Feature/homepage
+* [#409](https://github.com/i-dot-ai/redbox-copilot/pull/409): Document how to save and load dumps from the vector store
+* [#407](https://github.com/i-dot-ai/redbox-copilot/pull/407): Pull in change from main branch
+* [#406](https://github.com/i-dot-ai/redbox-copilot/pull/406): call core api delete from django delete
+* [#405](https://github.com/i-dot-ai/redbox-copilot/pull/405): feature/fast-embeddings
+* [#403](https://github.com/i-dot-ai/redbox-copilot/pull/403): Bugfix/document unique name locally
+* [#402](https://github.com/i-dot-ai/redbox-copilot/pull/402): bugfix/concat-strs
+* [#401](https://github.com/i-dot-ai/redbox-copilot/pull/401): bugfix/remove-unused-postgres-password
+* [#396](https://github.com/i-dot-ai/redbox-copilot/pull/396): Revert "Feature/daphne-webserver"
+* [#395](https://github.com/i-dot-ai/redbox-copilot/pull/395): feature/admit-co-users
+* [#394](https://github.com/i-dot-ai/redbox-copilot/pull/394): Updated content on homepage
+* [#393](https://github.com/i-dot-ai/redbox-copilot/pull/393): Adding MLflow experiments
+* [#392](https://github.com/i-dot-ai/redbox-copilot/pull/392): commenting out mlflow in docker-compose.yml file
+* [#391](https://github.com/i-dot-ai/redbox-copilot/pull/391): gracefully handle a lack of file
+* [#390](https://github.com/i-dot-ai/redbox-copilot/pull/390): Revert "Use document unique name for minio download link"
+* [#389](https://github.com/i-dot-ai/redbox-copilot/pull/389): Change h1 for magic link page
+* [#388](https://github.com/i-dot-ai/redbox-copilot/pull/388): Use document unique name for minio download link
+* [#387](https://github.com/i-dot-ai/redbox-copilot/pull/387): Style sources for SSR generated responses
+* [#386](https://github.com/i-dot-ai/redbox-copilot/pull/386): feature/omit-empty-sources
+* [#385](https://github.com/i-dot-ai/redbox-copilot/pull/385): Feature/daphne-webserver
+* [#384](https://github.com/i-dot-ai/redbox-copilot/pull/384): Bump the minor-patch group across 1 directory with 9 updates
+* [#383](https://github.com/i-dot-ai/redbox-copilot/pull/383): feature/move-deployment-instructions
+* [#382](https://github.com/i-dot-ai/redbox-copilot/pull/382): Remove last traces of testserver
+* [#380](https://github.com/i-dot-ai/redbox-copilot/pull/380): Introduce linting rules tranche 2
+* [#378](https://github.com/i-dot-ai/redbox-copilot/pull/378): bugfix/remove-schema-from-host
+* [#377](https://github.com/i-dot-ai/redbox-copilot/pull/377): Handle duplicate file names
+* [#376](https://github.com/i-dot-ai/redbox-copilot/pull/376): Feature/document status check
+* [#375](https://github.com/i-dot-ai/redbox-copilot/pull/375): Add table support for markdown to HTML conversion
+* [#374](https://github.com/i-dot-ai/redbox-copilot/pull/374): feature/REDBOX-252-failure-to-embed-doc-leads-to-a-poor-error-message
+* [#372](https://github.com/i-dot-ai/redbox-copilot/pull/372): change signature
+* [#371](https://github.com/i-dot-ai/redbox-copilot/pull/371): Added contact email for support pages
+* [#370](https://github.com/i-dot-ai/redbox-copilot/pull/370): Add notification banner and backlinks to document pages
+* [#369](https://github.com/i-dot-ai/redbox-copilot/pull/369): Add condition to use small instance type for non prod env.
+* [#368](https://github.com/i-dot-ai/redbox-copilot/pull/368): Bugfix/sort out urls
+* [#367](https://github.com/i-dot-ai/redbox-copilot/pull/367): bugfix/REDBOX-239-error-on-sign-in-if-already-signed-in
+* [#365](https://github.com/i-dot-ai/redbox-copilot/pull/365): Redirect to documents page on sucessful file upload
+* [#364](https://github.com/i-dot-ai/redbox-copilot/pull/364): Notebook for generating CoreAPI token
+* [#363](https://github.com/i-dot-ai/redbox-copilot/pull/363): Add COMPRESSION_ENABLED checks
+* [#361](https://github.com/i-dot-ai/redbox-copilot/pull/361): REDBOX 225 - display link to sources
+* [#360](https://github.com/i-dot-ai/redbox-copilot/pull/360): Added list files endpoint
+* [#359](https://github.com/i-dot-ai/redbox-copilot/pull/359): Bugfix/fix trailing slashes by removing whitenoise
+* [#358](https://github.com/i-dot-ai/redbox-copilot/pull/358): Bugfix/django tests pass locally
+* [#356](https://github.com/i-dot-ai/redbox-copilot/pull/356): Fix new session for every message bug
+* [#355](https://github.com/i-dot-ai/redbox-copilot/pull/355): Disable chunk clustering default
+* [#354](https://github.com/i-dot-ai/redbox-copilot/pull/354): Fix button alignment on Documents page
+* [#353](https://github.com/i-dot-ai/redbox-copilot/pull/353): Bugfix/fix trailing slashes by removing whitenoise
+* [#352](https://github.com/i-dot-ai/redbox-copilot/pull/352): Feature/design system
+* [#351](https://github.com/i-dot-ai/redbox-copilot/pull/351): Updates poetry lockfile after torch downgrade
+* [#350](https://github.com/i-dot-ai/redbox-copilot/pull/350): Added API error codes and implemented 404 on file endpoints
+* [#349](https://github.com/i-dot-ai/redbox-copilot/pull/349): service discovery added
+* [#346](https://github.com/i-dot-ai/redbox-copilot/pull/346): Management command for E2E tests
+* [#345](https://github.com/i-dot-ai/redbox-copilot/pull/345): Downgraded torch to 2.2.2
+* [#344](https://github.com/i-dot-ai/redbox-copilot/pull/344): now using empty strings rather than null
+* [#343](https://github.com/i-dot-ai/redbox-copilot/pull/343): feature/test-sign-in
+* [#341](https://github.com/i-dot-ai/redbox-copilot/pull/341): Feature/django-fixes
+* [#340](https://github.com/i-dot-ai/redbox-copilot/pull/340): Bump pydantic from 1.10.15 to 2.7.1
+* [#339](https://github.com/i-dot-ai/redbox-copilot/pull/339): Bump gunicorn from 20.1.0 to 22.0.0
+* [#337](https://github.com/i-dot-ai/redbox-copilot/pull/337): Feature/markdown to html
+* [#336](https://github.com/i-dot-ai/redbox-copilot/pull/336): Bump gunicorn from 20.1.0 to 22.0.0 in /mlflow in the pip group across 1 directory
+* [#335](https://github.com/i-dot-ai/redbox-copilot/pull/335): Make logging show up from Django app running in container.
+* [#334](https://github.com/i-dot-ai/redbox-copilot/pull/334): Added link to feedback survey
+* [#333](https://github.com/i-dot-ai/redbox-copilot/pull/333): Feature/homepage update
+* [#332](https://github.com/i-dot-ai/redbox-copilot/pull/332): Bump the minor-patch group across 1 directory with 8 updates
+* [#330](https://github.com/i-dot-ai/redbox-copilot/pull/330): Spike/redbox 204 rag evaluation
+* [#328](https://github.com/i-dot-ai/redbox-copilot/pull/328): feature/deploy-django-to-internet
+* [#327](https://github.com/i-dot-ai/redbox-copilot/pull/327): Feature/response feedback
+* [#326](https://github.com/i-dot-ai/redbox-copilot/pull/326): Feature/convert local storage back to minio
+* [#324](https://github.com/i-dot-ai/redbox-copilot/pull/324): feature/refactored chunking code
+* [#323](https://github.com/i-dot-ai/redbox-copilot/pull/323): Start to introduce additional linting rules.
+* [#322](https://github.com/i-dot-ai/redbox-copilot/pull/322): Remove old frontend prototypes
+* [#321](https://github.com/i-dot-ai/redbox-copilot/pull/321): feature/REDBOX-171-add-user-filtering-to-core-api-part-2
+* [#320](https://github.com/i-dot-ai/redbox-copilot/pull/320): Feature/add document management using filefield
+* [#319](https://github.com/i-dot-ai/redbox-copilot/pull/319): Bump the minor-patch group across 1 directory with 16 updates
+* [#318](https://github.com/i-dot-ai/redbox-copilot/pull/318): Feature/add doc upload for s3
+* [#317](https://github.com/i-dot-ai/redbox-copilot/pull/317): Django layer of chat streaming
+* [#316](https://github.com/i-dot-ai/redbox-copilot/pull/316): bugfix/restored model download
+* [#315](https://github.com/i-dot-ai/redbox-copilot/pull/315): bugfix/restore-image-tag
+* [#314](https://github.com/i-dot-ai/redbox-copilot/pull/314): Feature/streaming
+* [#309](https://github.com/i-dot-ai/redbox-copilot/pull/309): Feature/redbox 171 add user filtering to core api
+* [#308](https://github.com/i-dot-ai/redbox-copilot/pull/308): Feature/doc management page
+* [#306](https://github.com/i-dot-ai/redbox-copilot/pull/306): Add client-side streaming to sessions page
+* [#304](https://github.com/i-dot-ai/redbox-copilot/pull/304): Fix for new core-api /chat/rag/ schema.
+* [#303](https://github.com/i-dot-ai/redbox-copilot/pull/303): Adding AWS_REGION as an empty parameter in .env.example to ensure new…
+* [#301](https://github.com/i-dot-ai/redbox-copilot/pull/301): feature/REDBOX-170-add-jwt-to-core-api
+* [#300](https://github.com/i-dot-ai/redbox-copilot/pull/300): feature/remove-embeedding-endpoint
+* [#299](https://github.com/i-dot-ai/redbox-copilot/pull/299): bugfix/made settings optional
+* [#298](https://github.com/i-dot-ai/redbox-copilot/pull/298): Feature/redbox 200 move sources to a separate field for chat endpoint responses
+* [#297](https://github.com/i-dot-ai/redbox-copilot/pull/297): Bugfix/fix migration being arranged incorrectly
+* [#295](https://github.com/i-dot-ai/redbox-copilot/pull/295): Feature/chat page functionality
+* [#293](https://github.com/i-dot-ai/redbox-copilot/pull/293): added realistic tests data
+* [#292](https://github.com/i-dot-ai/redbox-copilot/pull/292): Feature/deploy django ecs
+* [#290](https://github.com/i-dot-ai/redbox-copilot/pull/290): Log cleanup and clarification
+* [#286](https://github.com/i-dot-ai/redbox-copilot/pull/286): removed unused code
+* [#284](https://github.com/i-dot-ai/redbox-copilot/pull/284): Add file upload endpoint for testing
+* [#282](https://github.com/i-dot-ai/redbox-copilot/pull/282): ruff format
+* [#281](https://github.com/i-dot-ai/redbox-copilot/pull/281): Added django_magic_link package and email settings
+* [#280](https://github.com/i-dot-ai/redbox-copilot/pull/280): Build auth templates
+* [#279](https://github.com/i-dot-ai/redbox-copilot/pull/279): feature/integration test extended to cover RAG
+* [#277](https://github.com/i-dot-ai/redbox-copilot/pull/277): mlflow - connecting endpoints to tracking server
+* [#276](https://github.com/i-dot-ai/redbox-copilot/pull/276): Fixed chunking so index is set correctly
+* [#275](https://github.com/i-dot-ai/redbox-copilot/pull/275): Add a basic sessions page
+* [#274](https://github.com/i-dot-ai/redbox-copilot/pull/274): feature/REDBOX-105-add-RAG-chat-only
+* [#273](https://github.com/i-dot-ai/redbox-copilot/pull/273): bugfix/extend s3 access to ingester and embedder
+* [#271](https://github.com/i-dot-ai/redbox-copilot/pull/271): add: cognito
+* [#268](https://github.com/i-dot-ai/redbox-copilot/pull/268): Feature/redbox 169 merge embedder and ingester into one service
+* [#266](https://github.com/i-dot-ai/redbox-copilot/pull/266): add: waf
+* [#265](https://github.com/i-dot-ai/redbox-copilot/pull/265): Feature/rds
+* [#263](https://github.com/i-dot-ai/redbox-copilot/pull/263): feature/switched to having one sg per ecs service
+* [#262](https://github.com/i-dot-ai/redbox-copilot/pull/262): feature/REDBOX-138-tighten-the-definition-of-metadata
+* [#261](https://github.com/i-dot-ai/redbox-copilot/pull/261): feature/deploy-OPENAI-API-KEY
+* [#260](https://github.com/i-dot-ai/redbox-copilot/pull/260): Bump the minor-patch group across 1 directory with 5 updates
+* [#254](https://github.com/i-dot-ai/redbox-copilot/pull/254): Feature/deploy embedder ingester
+* [#252](https://github.com/i-dot-ai/redbox-copilot/pull/252): Formatting fix
+* [#251](https://github.com/i-dot-ai/redbox-copilot/pull/251): bugfix/ignore-faststream-upgrade
+* [#249](https://github.com/i-dot-ai/redbox-copilot/pull/249): bugfix/corrected-redis-sg
+* [#247](https://github.com/i-dot-ai/redbox-copilot/pull/247): Build file-status update JavaScript
+* [#245](https://github.com/i-dot-ai/redbox-copilot/pull/245): add: redbox loadbalancer
+* [#243](https://github.com/i-dot-ai/redbox-copilot/pull/243): Feature/health endpoints for workers
+* [#242](https://github.com/i-dot-ai/redbox-copilot/pull/242): feature/rationalise-file-endpoint-post
+* [#240](https://github.com/i-dot-ai/redbox-copilot/pull/240): added model to docker build
+* [#238](https://github.com/i-dot-ai/redbox-copilot/pull/238): feature/use html as example file
+* [#237](https://github.com/i-dot-ai/redbox-copilot/pull/237): Added models and migrations based on schema diagram
+* [#235](https://github.com/i-dot-ai/redbox-copilot/pull/235): Code reference documentation
+* [#234](https://github.com/i-dot-ai/redbox-copilot/pull/234): Feature/redbox 106 add vanilla chat
+* [#233](https://github.com/i-dot-ai/redbox-copilot/pull/233): Feature/help pages
+* [#230](https://github.com/i-dot-ai/redbox-copilot/pull/230): feature/core api deployment
+* [#229](https://github.com/i-dot-ai/redbox-copilot/pull/229): added a redis insatance
+* [#227](https://github.com/i-dot-ai/redbox-copilot/pull/227): Fix browser console errors
+* [#226](https://github.com/i-dot-ai/redbox-copilot/pull/226): feature/REDBOX-155-remove-streamlit-from-main-redbox-repo
+* [#225](https://github.com/i-dot-ai/redbox-copilot/pull/225): Feature/redbox 140 finalize file model
+* [#224](https://github.com/i-dot-ai/redbox-copilot/pull/224): bugfix/implicit single connection
+* [#222](https://github.com/i-dot-ai/redbox-copilot/pull/222): Bugfix/ruff not checking code
+>>>>>>> 96d5faf850a87bd7d9bb8a696a5b2343b6a47ba3
 
 
 # version v0.2.0

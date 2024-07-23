@@ -3,7 +3,11 @@
 This page lists the frontends that are available for the the Redbox backend.
 
 - [Streamlit](https://github.com/i-dot-ai/redbox-copilot-streamlit) -  A lightweight frontend, ideal for demos and quick prototyping.
+<<<<<<< HEAD
 - [Django](https://github.com/i-dot-ai/redbox/tree/main/django_app) - A full-featured frontend, ideal for production deployments.
+=======
+- [Django](https://github.com/i-dot-ai/redbox-copilot/tree/main/django-app) - A full-featured frontend, ideal for production deployments.
+>>>>>>> 96d5faf850a87bd7d9bb8a696a5b2343b6a47ba3
 
 ## Motivations
 

@@ -4,12 +4,12 @@ FROM node:18 AS npm-packages
 
 WORKDIR /src
 
-COPY django_app/frontend/package.json .
+COPY django-app/frontend/package.json .
 RUN npm install
 
-COPY django_app/frontend/staticfiles.json django_app/frontend/.parcelrc django_app/frontend/*.js ./
-COPY django_app/frontend/src/ ./src/
-COPY django_app/frontend/images/ ./images/
+COPY django-app/frontend/staticfiles.json django-app/frontend/.parcelrc django-app/frontend/*.js ./
+COPY django-app/frontend/src/ ./src/
+COPY django-app/frontend/images/ ./images/
 RUN npx parcel build
 
 
@@ -22,8 +22,8 @@ RUN pip install poetry poetry-plugin-bundle
 
 WORKDIR /src
 
-COPY django_app/pyproject.toml .
-COPY django_app/poetry.lock .
+COPY django-app/pyproject.toml .
+COPY django-app/poetry.lock .
 
 # do this so that poetry bundle can run without the project - can't pass --no-root to bundle
 #RUN touch README.md
@@ -32,13 +32,13 @@ RUN poetry bundle venv ./venv
 
 
 # app
-FROM python:3.12-slim
+FROM python:3.12-slim as runtime
 
 RUN apt-get update && apt-get install --yes libpq-dev curl > /dev/null
 
 WORKDIR /usr/src/app
 
-COPY django_app/ .
+COPY django-app/ .
 
 COPY --from=npm-packages /src/node_modules/ frontend/node_modules/
 COPY --from=npm-packages /src/dist/ frontend/dist/

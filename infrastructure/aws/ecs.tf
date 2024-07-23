@@ -68,7 +68,7 @@ resource "aws_secretsmanager_secret_version" "core-api-json-secret" {
 
 resource "aws_secretsmanager_secret_version" "django-app-json-secret" {
   secret_id     = aws_secretsmanager_secret.django-app-secret.id
-  secret_string = jsonencode(local.django_app_secrets)
+  secret_string = jsonencode(local.django-app_secrets)
 }
 
 resource "aws_secretsmanager_secret_version" "worker-json-secret" {
@@ -89,7 +89,7 @@ module "django-app" {
   ecs_cluster_name           = module.cluster.ecs_cluster_name
   autoscaling_minimum_target = 1
   autoscaling_maximum_target = 10
-  health_check               = {
+  health_check = {
     healthy_threshold   = 3
     unhealthy_threshold = 3
     accepted_response   = "200"
@@ -104,7 +104,7 @@ module "django-app" {
   aws_lb_arn                   = module.load_balancer.alb_arn
   host                         = local.django_host
   ip_whitelist                 = var.external_ips
-  environment_variables        = local.django_app_environment_variables
+  environment_variables        = local.django-app_environment_variables
   secrets                      = local.reconstructed_django_secrets
 }
 
@@ -123,7 +123,7 @@ module "core_api" {
   ecs_cluster_name              = module.cluster.ecs_cluster_name
   autoscaling_minimum_target    = 1
   autoscaling_maximum_target    = 10
-  health_check                  = {
+  health_check = {
     healthy_threshold   = 3
     unhealthy_threshold = 3
     accepted_response   = "200"

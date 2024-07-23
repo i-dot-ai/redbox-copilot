@@ -12,7 +12,7 @@ readme = "../README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-redbox = {git = "https://github.com/i-dot-ai/redbox.git", rev = "1f9e018", subdirectory = "redbox-core"}
+redbox = {path="../redbox-core", develop=true}
 langchain = "^0.2.6"
 langchain-elasticsearch = "^0.2.2"
 elasticsearch = "^8.14.0"

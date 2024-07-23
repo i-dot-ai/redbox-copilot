@@ -59,8 +59,8 @@ test-django: stop ## Test django-app
 
 .PHONY: build-django-static
 build-django-static: ## Build django-app static files
-	cd django_app/frontend/ && npm install && npm run build
-	cd django_app/ && poetry run python manage.py collectstatic --noinput
+	cd django-app/frontend/ && npm install && npm run build
+	cd django-app/ && poetry run python manage.py collectstatic --noinput
 
 .PHONY: test-integration
 test-integration: rebuild run test-integration-without-build ## Run all integration tests
@@ -87,9 +87,9 @@ format:  ## Format and fix code
 .PHONY: safe
 safe:  ##
 	poetry run bandit -ll -r ./redbox
-	poetry run bandit -ll -r ./django_app
+	poetry run bandit -ll -r ./django-app
 	poetry run mypy ./redbox --ignore-missing-imports
-	poetry run mypy ./django_app --ignore-missing-imports
+	poetry run mypy ./django-app --ignore-missing-imports
 
 .PHONY: checktypes
 checktypes:  ## Check types in redbox and worker
@@ -126,13 +126,20 @@ docs-build:  ## Build documentation
 # Docker
 AWS_REGION=eu-west-2
 APP_NAME=redbox
+
+ECR_REPO_NAME=$(APP_NAME)-$(service)
 ECR_URL=$(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
 ECR_REPO_URL=$(ECR_URL)/$(ECR_REPO_NAME)
-IMAGE=$(ECR_REPO_URL):$(IMAGE_TAG)
 
-ECR_REPO_NAME=$(APP_NAME)
-PREV_IMAGE_TAG=$$(git rev-parse HEAD~1)
 IMAGE_TAG=$$(git rev-parse HEAD)
+PREV_IMAGE_TAG=$$(git rev-parse HEAD~1)
+MAIN_IMAGE_TAG=$$(git rev-parse origin/main)
+
+IMAGE=$(ECR_REPO_URL):$(IMAGE_TAG)
+PREV_IMAGE=$(ECR_REPO_URL):$(PREV_IMAGE_TAG)
+
+DOCKER_CACHE_BUCKET=i-dot-ai-docker-cache
+DOCKER_BUILDER_CONTAINER=$(APP_NAME)
 
 tf_build_args=-var "image_tag=$(IMAGE_TAG)"
 DOCKER_SERVICES=$$(docker compose config --services | grep -v mlflow)
@@ -156,48 +163,27 @@ target_modules = $(foreach resource,$(AUTO_APPLY_RESOURCES),-target $(resource))
 docker_login:
 	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(ECR_URL)
 
-.PHONY: docker_build
-docker_build: ## Build the docker container
-	@cp .env.example .env
-	# Fetching list of services defined in docker compose configuration
-	@echo "Services to update: $(DOCKER_SERVICES)"
-	# Enabling Docker BuildKit for better build performance
-	export DOCKER_BUILDKIT=1
-	@for service in $(DOCKER_SERVICES); do \
-		if grep -A 2 "^\s*$$service:" docker-compose.yml | grep -q 'build:'; then \
-			echo "Building $$service..."; \
-			PREV_IMAGE="$(ECR_REPO_URL)-$$service:$(PREV_IMAGE_TAG)"; \
-			echo "Pulling previous image: $$PREV_IMAGE"; \
-			docker pull $$PREV_IMAGE; \
-			docker compose build $$service; \
-		else \
-			echo "Skipping $$service uses default image"; \
-		fi; \
-	done
+.PHONY: docker_build_local
+docker_build_local: ## Build the docker container locally
+	DOCKER_BUILDKIT=1 docker build --target=runtime -t $(IMAGE) -f $(service)/Dockerfile .
 
+ifndef cache
+	override cache = ./.build-cache
+
+.PHONY: docker_build
+docker_build: ## Pull previous container (if it exists) build the docker container
+	DOCKER_BUILDKIT=1 docker buildx build --target=runtime --platform linux/amd64 --load --builder=$(DOCKER_BUILDER_CONTAINER) -t $(IMAGE) \
+	--cache-to type=local,dest=$(cache) \
+	--cache-from type=local,src=$(cache) -f $(service)/Dockerfile .
 
 .PHONY: docker_push
 docker_push:
-	@echo "Services to push: $(DOCKER_SERVICES)"
-	@for service in $(DOCKER_SERVICES); do \
-		if grep -A 2 "^\s*$$service:" docker-compose.yml | grep -q 'build:'; then \
-			echo "Pushing $$service..."; \
-			ECR_REPO_SERVICE_TAG=$(ECR_REPO_URL)-$$service:$(IMAGE_TAG); \
-			CURRENT_TAG=$$(grep -A 1 "^\s*$$service:" docker-compose.yml | grep 'image:' | sed 's/.*image:\s*//'); \
-			echo "Tagging $$service: $$CURRENT_TAG -> $$ECR_REPO_SERVICE_TAG"; \
-			docker tag $$CURRENT_TAG $$ECR_REPO_SERVICE_TAG; \
-			docker push $$ECR_REPO_SERVICE_TAG; \
-		else \
-			echo "Skipping $$service uses default image"; \
-		fi; \
-	done
+	docker push $(IMAGE)
 
 .PHONY: docker_update_tag
 docker_update_tag:
-	for service in django-app core-api worker; do \
-		MANIFEST=$$(aws ecr batch-get-image --repository-name $(ECR_REPO_NAME)-$$service --image-ids imageTag=$(IMAGE_TAG) --query 'images[].imageManifest' --output text) ; \
-		aws ecr put-image --repository-name $(ECR_REPO_NAME)-$$service --image-tag $(tag) --image-manifest "$$MANIFEST" ; \
-	done
+	MANIFEST=$$(aws ecr batch-get-image --repository-name $(ECR_REPO_NAME) --image-ids imageTag=$(IMAGE_TAG) --query 'images[].imageManifest' --output text) ; \
+	aws ecr put-image --repository-name $(ECR_REPO_NAME) --image-tag $(tag) --image-manifest "$$MANIFEST" ; \
 
 # Ouputs the value that you're after - useful to get a value i.e. IMAGE_TAG out of the Makefile
 .PHONY: docker_echo

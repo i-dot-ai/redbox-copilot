@@ -1675,7 +1675,7 @@ optional = false
 python-versions = ">=3.7"
 files = [
     {file = "django-appconf-1.0.6.tar.gz", hash = "sha256:cfe87ea827c4ee04b9a70fab90b86d704cb02f2981f89da8423cb0fabf88efbf"},
-    {file = "django_appconf-1.0.6-py3-none-any.whl", hash = "sha256:c3ae442fba1ff7ec830412c5184b17169a7a1e71cf0864a4c3f93cf4c98a1993"},
+    {file = "django-appconf-1.0.6-py3-none-any.whl", hash = "sha256:c3ae442fba1ff7ec830412c5184b17169a7a1e71cf0864a4c3f93cf4c98a1993"},
 ]
 
 [package.dependencies]
@@ -6834,7 +6834,7 @@ yarl = "^1.9.4"
 
 [package.source]
 type = "directory"
-url = "../django_app"
+url = "../django-app"
 
 [[package]]
 name = "redis"

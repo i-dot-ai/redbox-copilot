@@ -16,7 +16,7 @@ python = ">=3.12,<3.13"
 redbox = {path="../redbox-core", develop=true}
 worker = {path="../worker", develop=true}
 core_api = {path="../core-api", develop=true}
-redbox_app = {path="../django_app", develop=true}
+redbox_app = {path="../django-app", develop=true}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"

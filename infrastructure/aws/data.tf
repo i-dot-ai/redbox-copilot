@@ -30,7 +30,7 @@ locals {
     }
   )
 
-  django_app_environment_variables = {
+  django-app_environment_variables = {
     "OBJECT_STORE" : "s3",
     "BUCKET_NAME" : aws_s3_bucket.user_data.bucket,
     "POSTGRES_DB" : module.rds.db_instance_name,
@@ -77,7 +77,7 @@ locals {
     "LLM_MAX_TOKENS" : var.llm_max_tokens,
   }
 
-  django_app_secrets = {
+  django-app_secrets = {
     "DJANGO_SECRET_KEY" : var.django_secret_key,
     "POSTGRES_PASSWORD" : module.rds.rds_instance_db_password,
     "POSTGRES_HOST" : module.rds.db_instance_address,
@@ -95,7 +95,7 @@ locals {
 
   reconstructed_worker_secrets = [for k, _ in local.worker_secrets : { name = k, valueFrom = "${aws_secretsmanager_secret.worker-secret.arn}:${k}::" }]
   reconstructed_core_secrets   = [for k, _ in local.core_secrets : { name = k, valueFrom = "${aws_secretsmanager_secret.core-api-secret.arn}:${k}::" }]
-  reconstructed_django_secrets = [for k, _ in local.django_app_secrets : { name = k, valueFrom = "${aws_secretsmanager_secret.django-app-secret.arn}:${k}::" }]
+  reconstructed_django_secrets = [for k, _ in local.django-app_secrets : { name = k, valueFrom = "${aws_secretsmanager_secret.django-app-secret.arn}:${k}::" }]
 }
 
 data "terraform_remote_state" "vpc" {
