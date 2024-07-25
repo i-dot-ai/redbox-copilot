@@ -59,8 +59,8 @@ test-django: stop ## Test django-app
 
 .PHONY: build-django-static
 build-django-static: ## Build django-app static files
-	cd django_app/frontend/ && npm install && npm run build
-	cd django_app/ && poetry run python manage.py collectstatic --noinput
+	cd django-app/frontend/ && npm install && npm run build
+	cd django-app/ && poetry run python manage.py collectstatic --noinput
 
 .PHONY: test-integration
 test-integration: rebuild run test-integration-without-build ## Run all integration tests
@@ -87,9 +87,9 @@ format:  ## Format and fix code
 .PHONY: safe
 safe:  ##
 	poetry run bandit -ll -r ./redbox
-	poetry run bandit -ll -r ./django_app
+	poetry run bandit -ll -r ./django-app
 	poetry run mypy ./redbox --ignore-missing-imports
-	poetry run mypy ./django_app --ignore-missing-imports
+	poetry run mypy ./django-app --ignore-missing-imports
 
 .PHONY: checktypes
 checktypes:  ## Check types in redbox and worker

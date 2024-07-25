@@ -6,7 +6,7 @@
 * [#603](https://github.com/i-dot-ai/redbox/pull/603): Bump pikepdf from 8.15.1 to 9.0.0
 * [#602](https://github.com/i-dot-ai/redbox/pull/602): Bump sentence-transformers from 2.7.0 to 3.0.1
 * [#601](https://github.com/i-dot-ai/redbox/pull/601): Bump the minor-patch group with 19 updates
-* [#600](https://github.com/i-dot-ai/redbox/pull/600): Bump urllib3 from 2.2.1 to 2.2.2 in /django_app in the pip group across 1 directory
+* [#600](https://github.com/i-dot-ai/redbox/pull/600): Bump urllib3 from 2.2.1 to 2.2.2 in /django-app in the pip group across 1 directory
 * [#598](https://github.com/i-dot-ai/redbox/pull/598): Patches for streaming
 * [#597](https://github.com/i-dot-ai/redbox/pull/597): EN-28 - AWS tagging updates
 * [#596](https://github.com/i-dot-ai/redbox/pull/596): Refactored the chat app to be fastapi dependency based
@@ -53,7 +53,7 @@
 * [#532](https://github.com/i-dot-ai/redbox/pull/532): Add functions to save and load embeddings
 * [#531](https://github.com/i-dot-ai/redbox/pull/531): bugfix/gpt4
 * [#530](https://github.com/i-dot-ai/redbox/pull/530): Don't show "this is not a live service" banner in prod.
-* [#529](https://github.com/i-dot-ai/redbox/pull/529): Run static checks on django_app changes.
+* [#529](https://github.com/i-dot-ai/redbox/pull/529): Run static checks on django-app changes.
 * [#528](https://github.com/i-dot-ai/redbox/pull/528): Use minio to get file url in integration
 * [#527](https://github.com/i-dot-ai/redbox/pull/527): Formatting
 * [#526](https://github.com/i-dot-ai/redbox/pull/526): Enable multi-file uploads

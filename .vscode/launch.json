@@ -14,8 +14,8 @@
             ],
             "django": true,
             "autoStartBrowser": false,
-            "program": "${workspaceFolder}/django_app/manage.py",
-            "envFile": "${workspaceFolder}/django_app/.env",
+            "program": "${workspaceFolder}/django-app/manage.py",
+            "envFile": "${workspaceFolder}/django-app/.env",
             "env": {
                 "PYTHONPATH": "${poetry env info -p}/bin/python"
             }

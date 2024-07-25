@@ -75,12 +75,12 @@ resource "aws_secretsmanager_secret_version" "core-api-json-secret" {
 
 resource "aws_secretsmanager_secret_version" "django-app-json-secret" {
   secret_id     = aws_secretsmanager_secret.django-app-secret.id
-  secret_string = jsonencode(local.django_app_secrets)
+  secret_string = jsonencode(local.django-app_secrets)
 }
 
 resource "aws_secretsmanager_secret_version" "django-command-json-secret" {
   secret_id     = aws_secretsmanager_secret.django-command-secret.id
-  secret_string = jsonencode(local.django_app_secrets)
+  secret_string = jsonencode(local.django-app_secrets)
 }
 
 resource "aws_secretsmanager_secret_version" "worker-json-secret" {
@@ -116,7 +116,7 @@ module "django-app" {
   aws_lb_arn                   = module.load_balancer.alb_arn
   host                         = local.django_host
   ip_whitelist                 = var.external_ips
-  environment_variables        = local.django_app_environment_variables
+  environment_variables        = local.django-app_environment_variables
   secrets                      = local.reconstructed_django_secrets
   auto_scale_off_peak_times    = true
 }
@@ -142,7 +142,7 @@ module "django-command" {
   load_balancer_security_group = module.load_balancer.load_balancer_security_group_id
   aws_lb_arn                   = module.load_balancer.alb_arn
   host                         = local.django_host
-  environment_variables        = local.django_app_environment_variables
+  environment_variables        = local.django-app_environment_variables
   secrets                      = local.reconstructed_django_command_secrets
   http_healthcheck             = false
   ephemeral_storage            = 30

@@ -57,7 +57,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff.format]
-exclude = ["django_app/redbox_app/redbox_core/migrations/*.py"]
+exclude = ["django-app/redbox_app/redbox_core/migrations/*.py"]
 
 [tool.ruff.lint]
 # Dribble in those we have commented out, asterisked ones first
@@ -108,7 +108,7 @@ select = [
     "UP",
     "YTT",
 ]
-exclude = ["django_app/redbox_app/redbox_core/migrations/*.py", "out/*"]
+exclude = ["django-app/redbox_app/redbox_core/migrations/*.py", "out/*"]
 ignore = ["COM812", "DJ001", "RET505", "RET508", "PLR0913"]
 
 [tool.ruff.lint.isort]
@@ -117,7 +117,7 @@ known-first-party = ["redbox_app", "redbox", "core_api"]
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101", "S106", "PLR0913", "PLR0915", "PLR2004", "TD003", "S311"]
 "*/tests/*" = ["S101", "S106", "PLR0913", "PLR0915", "PLR2004", "TD003"]
-"django_app/tests_playwright/*" = ["S101", "S106", "PLR0913", "PLR2004", "TD003"]
+"django-app/tests_playwright/*" = ["S101", "S106", "PLR0913", "PLR2004", "TD003"]
 "worker/*" = ["B008"]
 "redbox/*" = ["TCH003"]
 "redbox/tests/*" = ["ARG001"]
