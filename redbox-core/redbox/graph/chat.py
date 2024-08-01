@@ -59,7 +59,7 @@ def get_chat_graph(llm: BaseChatModel, tokeniser: Encoding, env: Settings, debug
 
     app.add_node("llm", build_llm_chain(llm, tokeniser, env, env.ai.chat_system_prompt, env.ai.chat_question_prompt))
 
-    return app.compile(debug=debug)
+    return app
 
 
 @chain
@@ -130,7 +130,7 @@ def get_chat_with_docs_graph(
         },
     )
     app.add_edge(ChatRoute.chat_with_docs_map_reduce, "set_chat_prompt_args")
-    return app.compile(debug=debug)
+    return app
 
 
 def get_chat_with_docs_map_reduce_graph(
@@ -154,4 +154,4 @@ def get_chat_with_docs_map_reduce_graph(
 
     app.add_conditional_edges(START, to_map_step, then="reduce")
 
-    return app.compile(debug=debug)
+    return app

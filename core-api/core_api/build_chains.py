@@ -85,7 +85,7 @@ def build_chat_with_docs_chain(
         log.info("Length documents: %s", len(input_dict["documents"]))
         if len(input_dict["documents"]) == 1:
             return RunnablePassthrough.assign(
-                formatted_documents=(RunnablePassthrough() | itemgetter("documents") | format_documents)
+                formatted_documents=(itemgetter("documents") | format_documents)
             ) | {
                 "response": make_chat_prompt_from_messages_runnable(
                     system_prompt=env.ai.chat_with_docs_system_prompt,
@@ -102,7 +102,7 @@ def build_chat_with_docs_chain(
             return (
                 map_operation
                 | RunnablePassthrough.assign(
-                    formatted_documents=(RunnablePassthrough() | itemgetter("documents") | format_documents)
+                    formatted_documents=(itemgetter("documents") | format_documents)
                 )
                 | {
                     "response": make_chat_prompt_from_messages_runnable(
@@ -132,7 +132,7 @@ def build_retrieval_chain(
     return (
         RunnablePassthrough.assign(documents=retriever)
         | RunnablePassthrough.assign(
-            formatted_documents=(RunnablePassthrough() | itemgetter("documents") | format_documents)
+            formatted_documents=(itemgetter("documents") | format_documents)
         )
         | {
             "response": make_chat_prompt_from_messages_runnable(
@@ -174,7 +174,7 @@ def build_condense_retrieval_chain(
         RunnableLambda(route)
         | RunnablePassthrough.assign(documents=retriever | filter_by_elbow(enabled=env.ai.elbow_filter_enabled))
         | RunnablePassthrough.assign(
-            formatted_documents=(RunnablePassthrough() | itemgetter("documents") | format_documents)
+            formatted_documents=(itemgetter("documents") | format_documents)
         )
         | {
             "response": make_chat_prompt_from_messages_runnable(

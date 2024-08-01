@@ -25,4 +25,4 @@ def get_search_graph(
     app.add_edge("get_docs", "set_prompt_args")
     app.add_edge("set_prompt_args", "llm")
 
-    return app.compile(debug=debug)
+    return app
