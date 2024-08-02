@@ -1,5 +1,4 @@
 from langgraph.graph import StateGraph
-from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.vectorstores import VectorStoreRetriever
 from tiktoken import Encoding
 
@@ -8,7 +7,7 @@ from redbox.graph.search import get_search_graph
 from redbox.models.chain import ChainState
 from redbox.models.chat import ChatRoute
 from redbox.models.settings import Settings
-from redbox.chains.components import get_all_chunks_retriever, get_parameterised_retriever, get_chat_llm, get_tokeniser
+from redbox.chains.components import get_all_chunks_retriever, get_parameterised_retriever, get_tokeniser
 from redbox.graph.chat import get_chat_graph, get_chat_with_docs_graph
 
 
@@ -29,7 +28,6 @@ class Redbox:
 
     def __init__(
         self,
-        llm: BaseChatModel | None = None,
         all_chunks_retriever: VectorStoreRetriever | None = None,
         parameterised_retriever: VectorStoreRetriever | None = None,
         tokeniser: Encoding | None = None,
@@ -39,7 +37,6 @@ class Redbox:
         _env = env or Settings()
         _all_chunks_retriever = all_chunks_retriever or get_all_chunks_retriever(_env)
         _parameterised_retriever = parameterised_retriever or get_parameterised_retriever(_env)
-        _llm = llm or get_chat_llm(_env)
         _tokeniser = tokeniser or get_tokeniser()
 
         app = StateGraph(ChainState)
@@ -55,18 +52,16 @@ class Redbox:
         app.add_node(
             ChatRoute.search,
             get_search_graph(
-                _llm,
                 _parameterised_retriever.with_config(tags=[Redbox.SOURCE_DOCUMENTS_TAG]),
                 _tokeniser,
-                env.llm_max_tokens,
                 debug,
             ),
         )
-        app.add_node(ChatRoute.chat, get_chat_graph(_llm, _tokeniser, env.llm_max_tokens, debug))
+        app.add_node(ChatRoute.chat, get_chat_graph(_tokeniser, debug))
         app.add_node(
             ChatRoute.chat_with_docs,
             get_chat_with_docs_graph(
-                _llm, _all_chunks_retriever.with_config(tags=[Redbox.SOURCE_DOCUMENTS_TAG]), _tokeniser, _env, debug
+                _all_chunks_retriever.with_config(tags=[Redbox.SOURCE_DOCUMENTS_TAG]), _tokeniser, _env, debug
             ),
         )
         app.add_node(

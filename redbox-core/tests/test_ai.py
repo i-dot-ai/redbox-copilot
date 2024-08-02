@@ -22,9 +22,9 @@ from deepeval.test_case import LLMTestCase
 from elasticsearch.helpers import bulk, scan
 from pydantic import BaseModel, Field
 
-from redbox.chains.components import get_chat_llm, get_parameterised_retriever, get_tokeniser
+from redbox.chains.components import get_parameterised_retriever, get_tokeniser, get_llm
 from redbox.graph.search import get_search_graph
-from redbox.models.chain import ChainInput, ChainState
+from redbox.models.chain import ChainInput, ChainState, AISettings
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator
@@ -92,12 +92,17 @@ def ai_experiment_data() -> ExperimentData:
 
 
 @pytest.fixture(scope="session")
-def llm(env: Settings) -> ChatLiteLLM:
-    return get_chat_llm(env)
+def ai_settings():
+    return AISettings()
 
 
 @pytest.fixture(scope="session")
-def eval_llm(env: Settings) -> DeepEvalBaseLLM:
+def llm(ai_settings) -> ChatLiteLLM:
+    return get_llm(ai_settings)
+
+
+@pytest.fixture(scope="session")
+def eval_llm(ai_settings) -> DeepEvalBaseLLM:
     """Creates LLM for evaluating our data.
 
     Note in its current form this hard-codes the same model for generation
@@ -124,7 +129,7 @@ def eval_llm(env: Settings) -> DeepEvalBaseLLM:
         def get_model_name(self):
             return "Custom LiteLLM Model"
 
-    return ChatLiteLLMDeepEval(model=get_chat_llm(env))
+    return ChatLiteLLMDeepEval(model=get_llm(ai_settings))
 
 
 @pytest.fixture(scope="session")
@@ -189,10 +194,8 @@ def make_test_case(
     retriever = get_parameterised_retriever(env=env)
 
     rag_chain = get_search_graph(
-        llm=llm,
         retriever=retriever,
         tokeniser=get_tokeniser(),
-        llm_max_tokens=env.llm_max_tokens,
     )
 
     def _make_test_case(

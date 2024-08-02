@@ -1,6 +1,5 @@
 from langgraph.graph import StateGraph, START
 from langgraph.graph.graph import CompiledGraph
-from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.vectorstores import VectorStoreRetriever
 from tiktoken import Encoding
 
@@ -8,15 +7,13 @@ from redbox.chains.graph import build_get_docs_with_filter, build_llm_chain, set
 from redbox.models.chain import ChainInput, ChainState
 
 
-def get_search_graph(
-    llm: BaseChatModel, retriever: VectorStoreRetriever, tokeniser: Encoding, llm_max_tokens: int, debug: bool = False
-) -> CompiledGraph:
+def get_search_graph(retriever: VectorStoreRetriever, tokeniser: Encoding, debug: bool = False) -> CompiledGraph:
     app = StateGraph(ChainState)
 
     app.add_node("get_docs", build_get_docs_with_filter(retriever))
     app.add_node("set_prompt_args", set_prompt_args)
 
-    app.add_node("condense", build_llm_chain(llm, tokeniser, llm_max_tokens))
+    app.add_node("condense", build_llm_chain(tokeniser))
     app.add_node(
         "map_condense_to_question",
         lambda s: {
@@ -32,9 +29,7 @@ def get_search_graph(
     app.add_node(
         "llm",
         build_llm_chain(
-            llm,
             tokeniser,
-            llm_max_tokens,
             final_response_chain=True,
         ),
     )

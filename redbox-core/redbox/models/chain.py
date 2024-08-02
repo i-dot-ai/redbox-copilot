@@ -128,13 +128,21 @@ class AISettings(BaseModel):
     chat_map_question_prompt: str = CHAT_MAP_QUESTION_PROMPT
     reduce_system_prompt: str = REDUCE_SYSTEM_PROMPT
     reduce_question_prompt: str = REDUCE_QUESTION_PROMPT
-    llm_max_tokens: int = 1024
 
-    # size: int = 19 rag_k
     match_boost: int = 1
-    # num_candidates: int = 13 rag_num_candidates
     knn_boost: int = 1
     similarity_threshold: int = 0
+
+    chat_backend: Literal["azure", "openai", "fake"] = "azure"
+    fake_backend_responses: list = ["hello"]
+    llm_max_tokens: int = 1024
+
+    openai_api_key: str = "NotAKey"  # also in settings for embeddings
+    openai_api_version: str = "2023-12-01-preview"
+
+    azure_openai_api_key: str = "NotAKey"  # also in settings for embeddings
+    azure_openai_model: str = "azure/gpt-35-turbo-16k"
+    azure_openai_endpoint: str | None = None  # also in settings for embeddings
 
     @property
     def stuff_chunk_max_tokens(self) -> int:

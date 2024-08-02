@@ -9,7 +9,6 @@ from core_api import dependencies
 from core_api.app import app as application
 from core_api.routes.chat import chat_app
 from fastapi.testclient import TestClient
-from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
 from starlette.websockets import WebSocketDisconnect
 
 from redbox.models.chain import ChainInput
@@ -103,9 +102,6 @@ def test_case(request):
 @pytest.fixture
 def client(test_case: RedboxChatTestCase, embedding_model):
     chat_app.dependency_overrides[dependencies.get_embedding_model] = lambda: embedding_model
-    chat_app.dependency_overrides[dependencies.get_llm] = lambda: GenericFakeChatModel(
-        messages=iter(test_case.test_data.expected_llm_response)
-    )
     yield TestClient(application)
     chat_app.dependency_overrides = {}
 

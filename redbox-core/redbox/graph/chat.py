@@ -4,13 +4,13 @@ from langgraph.constants import Send
 from langgraph.graph.graph import CompiledGraph
 from langchain_core.runnables import chain, RunnableLambda, Runnable
 from langchain_core.documents import Document
-from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_text_splitters import TextSplitter, TokenTextSplitter
 from tiktoken import Encoding
 
 from redbox.api.format import format_documents
+from redbox.chains.components import get_llm
 from redbox.models.chain import ChainState, ChatMapReduceState
 from redbox.models.chat import ChatRoute
 from redbox.chains.graph import (
@@ -50,7 +50,7 @@ def build_reduce_docs_step(splitter: TextSplitter):
     ) | RunnableLambda(lambda docs: {"documents": docs})
 
 
-def get_chat_graph(llm: BaseChatModel, tokeniser: Encoding, llm_max_tokens: int, debug: bool = False) -> CompiledGraph:
+def get_chat_graph(tokeniser: Encoding, debug: bool = False) -> CompiledGraph:
     app = StateGraph(ChainState)
     app.set_entry_point("set_chat_prompt_args")
 
@@ -59,7 +59,7 @@ def get_chat_graph(llm: BaseChatModel, tokeniser: Encoding, llm_max_tokens: int,
 
     app.add_node(
         "llm",
-        build_llm_chain(llm, tokeniser, llm_max_tokens, final_response_chain=True),
+        build_llm_chain(tokeniser, final_response_chain=True),
     )
 
     return app.compile(debug=debug)
@@ -82,17 +82,23 @@ def set_chat_method(state: ChainState):
     return {"route_name": selected_tool}
 
 
-def build_llm_map_chain(llm: BaseChatModel, tokeniser: Encoding, llm_max_tokens: int) -> Runnable:
-    return (
-        make_chat_prompt_from_messages_runnable(tokeniser=tokeniser, llm_max_tokens=llm_max_tokens)
-        | llm
-        | StrOutputParser()
-        | RunnableLambda(lambda s: {"intermediate_docs": [Document(page_content=s)]})
-    )
+def build_llm_map_chain(tokeniser: Encoding) -> Runnable:
+    @chain
+    def _build_llm_map_chain(chain_state: ChainState):
+        llm = get_llm(chain_state["query"].ai_settings)
+        return (
+            make_chat_prompt_from_messages_runnable(
+                tokeniser=tokeniser, llm_max_tokens=chain_state["query"].ai_settings.llm_max_tokens
+            )
+            | llm
+            | StrOutputParser()
+            | RunnableLambda(lambda s: {"intermediate_docs": [Document(page_content=s)]})
+        )
+
+    return _build_llm_map_chain
 
 
 def get_chat_with_docs_graph(
-    llm: BaseChatModel,
     all_chunks_retriever: VectorStoreRetriever,
     tokeniser: Encoding,
     env: Settings,
@@ -108,15 +114,13 @@ def get_chat_with_docs_graph(
     app.add_node(
         "llm",
         build_llm_chain(
-            llm,
             tokeniser,
-            env.llm_max_tokens,
             final_response_chain=True,
         ),
     )
     app.add_node(
         ChatRoute.chat_with_docs_map_reduce,
-        get_chat_with_docs_map_reduce_graph(llm, tokeniser, env, debug),
+        get_chat_with_docs_map_reduce_graph(tokeniser, env, debug),
     )
     app.add_node("clear_documents", set_state_field("documents", []))
 
@@ -140,12 +144,10 @@ def get_chat_with_docs_graph(
     return app.compile(debug=debug)
 
 
-def get_chat_with_docs_map_reduce_graph(
-    llm: BaseChatModel, tokeniser: Encoding, env: Settings, debug: bool = False
-) -> CompiledGraph:
+def get_chat_with_docs_map_reduce_graph(tokeniser: Encoding, env: Settings, debug: bool = False) -> CompiledGraph:
     app = StateGraph(ChatMapReduceState)
 
-    app.add_node("llm_map", build_llm_map_chain(llm, tokeniser, env.llm_max_tokens))
+    app.add_node("llm_map", build_llm_map_chain(tokeniser))
     app.add_node(
         "reduce",
         build_reduce_docs_step(

@@ -5,12 +5,12 @@ from typing import Any
 from langchain.schema import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableLambda, RunnableParallel, chain
-from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.vectorstores import VectorStoreRetriever
 from tiktoken import Encoding
 
 from redbox.api.format import format_documents
 from redbox.api.runnables import filter_by_elbow
+from redbox.chains.components import get_llm
 from redbox.models import ChatRoute
 from redbox.models.chain import ChainChatMessage, ChainState
 from redbox.models.errors import QuestionLengthError
@@ -100,19 +100,25 @@ def set_prompt_args(state: ChainState):
 
 
 def build_llm_chain(
-    llm: BaseChatModel,
     tokeniser: Encoding,
-    llm_max_tokens: int,
     final_response_chain=False,
 ) -> Runnable:
-    _llm = llm.with_config(tags=["response_flag"]) if final_response_chain else llm
-    return RunnableParallel(
-        {
-            "response": make_chat_prompt_from_messages_runnable(tokeniser=tokeniser, llm_max_tokens=llm_max_tokens)
-            | _llm
-            | StrOutputParser(),
-        }
-    )
+    @chain
+    def _build_llm_chain(chain_state: ChainState):
+        llm = get_llm(chain_state["query"].ai_settings)
+        _llm = llm.with_config(tags=["response_flag"]) if final_response_chain else llm
+
+        return RunnableParallel(
+            {
+                "response": make_chat_prompt_from_messages_runnable(
+                    tokeniser=tokeniser, llm_max_tokens=chain_state["query"].ai_settings.llm_max_tokens
+                )
+                | _llm
+                | StrOutputParser(),
+            }
+        )
+
+    return _build_llm_chain
 
 
 def set_state_field(state_field: str, value: Any):

@@ -1,20 +1,60 @@
+import logging
+import os
+
+from langchain_community.chat_models import ChatLiteLLM
 from langchain_elasticsearch import ElasticsearchRetriever
 from langchain_core.embeddings import Embeddings, FakeEmbeddings
-from langchain_openai import AzureChatOpenAI
 from langchain_openai.embeddings import AzureOpenAIEmbeddings, OpenAIEmbeddings
 from langchain_core.utils import convert_to_secret_str
 import tiktoken
 
+from redbox.api.callbacks import LoggerCallbackHandler
+from redbox.models.chain import AISettings
 from redbox.models.settings import Settings
 from redbox.retriever import AllElasticsearchRetriever, ParameterisedElasticsearchRetriever
+from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
+
+log = logging.getLogger()
 
 
-def get_chat_llm(env: Settings):
-    return AzureChatOpenAI(
-        api_key=convert_to_secret_str(env.azure_openai_api_key),
-        azure_endpoint=env.azure_openai_endpoint,
-        model=env.azure_openai_model,
-    )
+def get_llm(ai_settings: AISettings) -> ChatLiteLLM:
+    logger_callback = LoggerCallbackHandler(logger=log)
+
+    # Create the appropriate LLM, either openai, Azure, anthropic or bedrock
+    if ai_settings.chat_backend == "openai":
+        log.info("Creating OpenAI LLM Client")
+        llm = ChatLiteLLM(
+            streaming=True,
+            openai_key=ai_settings.openai_api_key,
+            callbacks=[logger_callback],
+        )
+    elif ai_settings.chat_backend == "azure":
+        log.info("Creating Azure LLM Client")
+        log.info("api_base: %s", ai_settings.azure_openai_endpoint)
+        log.info("api_version: %s", ai_settings.openai_api_version)
+        log.info("llm_max_tokens: %i", ai_settings.llm_max_tokens)
+
+        # this nasty hack is required because, contrary to the docs:
+        # using the api_version argument is not sufficient, and we need
+        # to use the `OPENAI_API_VERSION` environment variable
+        os.environ["AZURE_API_VERSION"] = ai_settings.openai_api_version
+        os.environ["AZURE_OPENAI_API_KEY"] = ai_settings.azure_openai_api_key
+
+        llm = ChatLiteLLM(
+            model=ai_settings.azure_openai_model,
+            azure_api_key=ai_settings.azure_openai_api_key,
+            streaming=True,
+            api_base=ai_settings.azure_openai_endpoint,
+            max_tokens=ai_settings.llm_max_tokens,
+            callbacks=[logger_callback],
+        )
+    elif ai_settings.chat_backend == "fake":
+        return GenericFakeChatModel(messages=iter(ai_settings.fake_backend_responses))
+    else:
+        msg = "Unknown LLM model specified or missing"
+        log.exception(msg)
+        raise ValueError(msg)
+    return llm
 
 
 def get_tokeniser() -> tiktoken.Encoding:

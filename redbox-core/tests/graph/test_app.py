@@ -19,7 +19,13 @@ TEST_CASES = [
     test_case
     for generated_cases in [
         generate_test_cases(
-            query=ChainInput(question="What is AI?", file_uuids=[], user_uuid=uuid4(), chat_history=[]),
+            query=ChainInput(
+                question="What is AI?",
+                file_uuids=[],
+                user_uuid=uuid4(),
+                chat_history=[],
+                ai_settings={"chat_backend": "fake", "fake_backend_responses": ["Testing Response 1"]},
+            ),
             test_data=[
                 TestData(0, 0, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat),
                 TestData(1, 100, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat),
@@ -28,7 +34,13 @@ TEST_CASES = [
             test_id="Basic Chat",
         ),
         generate_test_cases(
-            query=ChainInput(question="What is AI?", file_uuids=[uuid4()], user_uuid=uuid4(), chat_history=[]),
+            query=ChainInput(
+                question="What is AI?",
+                file_uuids=[uuid4()],
+                user_uuid=uuid4(),
+                chat_history=[],
+                ai_settings={"chat_backend": "fake", "fake_backend_responses": ["Testing Response 1"]},
+            ),
             test_data=[
                 TestData(
                     1, 1000, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat_with_docs
@@ -43,7 +55,13 @@ TEST_CASES = [
             test_id="Chat with single doc",
         ),
         generate_test_cases(
-            query=ChainInput(question="What is AI?", file_uuids=[uuid4(), uuid4()], user_uuid=uuid4(), chat_history=[]),
+            query=ChainInput(
+                question="What is AI?",
+                file_uuids=[uuid4(), uuid4()],
+                user_uuid=uuid4(),
+                chat_history=[],
+                ai_settings={"chat_backend": "fake", "fake_backend_responses": ["Testing Response 1"]},
+            ),
             test_data=[
                 TestData(
                     2,
@@ -67,7 +85,13 @@ TEST_CASES = [
             test_id="Chat with multiple docs",
         ),
         generate_test_cases(
-            query=ChainInput(question="What is AI?", file_uuids=[uuid4()], user_uuid=uuid4(), chat_history=[]),
+            query=ChainInput(
+                question="What is AI?",
+                file_uuids=[uuid4()],
+                user_uuid=uuid4(),
+                chat_history=[],
+                ai_settings={"chat_backend": "fake", "fake_backend_responses": ["Testing Response 1"]},
+            ),
             test_data=[
                 TestData(
                     1, 200_000, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat_with_docs
@@ -76,7 +100,13 @@ TEST_CASES = [
             test_id="Chat with large doc",
         ),
         generate_test_cases(
-            query=ChainInput(question="@search What is AI?", file_uuids=[uuid4()], user_uuid=uuid4(), chat_history=[]),
+            query=ChainInput(
+                question="@search What is AI?",
+                file_uuids=[uuid4()],
+                user_uuid=uuid4(),
+                chat_history=[],
+                ai_settings={"chat_backend": "fake", "fake_backend_responses": ["The cake is a lie"]},
+            ),
             test_data=[
                 TestData(
                     1,
@@ -95,7 +125,11 @@ TEST_CASES = [
         ),
         generate_test_cases(
             query=ChainInput(
-                question="@nosuchkeyword What is AI?", file_uuids=[uuid4()], user_uuid=uuid4(), chat_history=[]
+                question="@nosuchkeyword What is AI?",
+                file_uuids=[uuid4()],
+                user_uuid=uuid4(),
+                chat_history=[],
+                ai_settings={"chat_backend": "fake", "fake_backend_responses": ["Testing Response 1"]},
             ),
             test_data=[
                 TestData(
@@ -140,7 +174,7 @@ def parameterised_retriever(docs):
 @pytest.mark.parametrize(("test_case"), TEST_CASES, ids=[t.test_id for t in TEST_CASES])
 async def test_chat(test_case: RedboxChatTestCase, env, tokeniser):
     app = Redbox(
-        llm=GenericFakeChatModel(messages=iter(test_case.test_data.expected_llm_response)),
+        # llm=GenericFakeChatModel(messages=iter(test_case.test_data.expected_llm_response)),
         all_chunks_retriever=all_chunks_retriever(test_case.docs),
         parameterised_retriever=parameterised_retriever(test_case.docs),
         tokeniser=tokeniser,
@@ -163,7 +197,7 @@ async def test_chat(test_case: RedboxChatTestCase, env, tokeniser):
 @pytest.mark.parametrize(("test_case"), TEST_CASES, ids=[t.test_id for t in TEST_CASES])
 async def test_streaming(test_case: RedboxChatTestCase, env, tokeniser):
     app = Redbox(
-        llm=GenericFakeChatModel(messages=iter(test_case.test_data.expected_llm_response)),
+        # llm=GenericFakeChatModel(messages=iter(test_case.test_data.expected_llm_response)),
         all_chunks_retriever=all_chunks_retriever(test_case.docs),
         parameterised_retriever=parameterised_retriever(test_case.docs),
         tokeniser=tokeniser,
