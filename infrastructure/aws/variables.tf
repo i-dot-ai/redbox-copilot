@@ -32,7 +32,8 @@ variable "django_command" {
   }))
   default = [
     { command : "delete_expired_data", task_name : "delete", schedule : "cron(00 02 * * ? *)" }, # every day at 2-2:30am
-    { command : "reingest_files", task_name : "reingest" } # manually triggered
+    { command : "reingest_files", task_name : "reingest" }, # manually triggered
+    { command : "check_file_status", task_name : "check_status" } # manually triggered
   ]
   description = "An object describing the django command to run"
 }
