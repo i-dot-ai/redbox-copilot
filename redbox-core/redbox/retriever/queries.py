@@ -3,7 +3,7 @@ from uuid import UUID
 
 from langchain_core.embeddings.embeddings import Embeddings
 
-from redbox.models.chain import ChainState
+from redbox.models.chain import RedboxState
 from redbox.models.file import ChunkResolution
 
 
@@ -46,7 +46,7 @@ def make_query_filter(user_uuid: UUID, file_uuids: list[UUID], chunk_resolution:
 
 def get_all(
     chunk_resolution: ChunkResolution | None,
-    state: ChainState,
+    state: RedboxState,
 ) -> dict[str, Any]:
     """
     Returns a parameterised elastic query that will return everything it matches.
@@ -54,7 +54,7 @@ def get_all(
     As it's used in summarisation, it excludes embeddings.
     """
 
-    query_filter = make_query_filter(state["query"].user_uuid, state["query"].file_uuids, chunk_resolution)
+    query_filter = make_query_filter(state["request"].user_uuid, state["request"].file_uuids, chunk_resolution)
     return {
         "_source": {"excludes": ["*embedding"]},
         "query": {"bool": {"must": {"match_all": {}}, "filter": query_filter}},
@@ -65,22 +65,22 @@ def get_some(
     embedding_model: Embeddings,
     embedding_field_name: str,
     chunk_resolution: ChunkResolution | None,
-    state: ChainState,
+    state: RedboxState,
 ) -> dict[str, Any]:
-    vector = embedding_model.embed_query(state["query"].question)
+    vector = embedding_model.embed_query(state["request"].question)
 
-    query_filter = make_query_filter(state["query"].user_uuid, state["query"].file_uuids, chunk_resolution)
+    query_filter = make_query_filter(state["request"].user_uuid, state["request"].file_uuids, chunk_resolution)
 
     return {
-        "size": state["query"].ai_settings.rag_k,
+        "size": state["request"].ai_settings.rag_k,
         "query": {
             "bool": {
                 "should": [
                     {
                         "match": {
                             "text": {
-                                "query": state["query"].question,
-                                "boost": state["query"].ai_settings.match_boost,
+                                "query": state["request"].question,
+                                "boost": state["request"].ai_settings.match_boost,
                             }
                         }
                     },
@@ -88,10 +88,10 @@ def get_some(
                         "knn": {
                             "field": embedding_field_name,
                             "query_vector": vector,
-                            "num_candidates": state["query"].ai_settings.rag_num_candidates,
+                            "num_candidates": state["request"].ai_settings.rag_num_candidates,
                             "filter": query_filter,
-                            "boost": state["query"].ai_settings.knn_boost,
-                            "similarity": state["query"].ai_settings.similarity_threshold,
+                            "boost": state["request"].ai_settings.knn_boost,
+                            "similarity": state["request"].ai_settings.similarity_threshold,
                         }
                     },
                 ],

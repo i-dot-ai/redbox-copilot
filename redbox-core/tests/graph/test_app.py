@@ -1,17 +1,21 @@
 from uuid import uuid4
 import pytest
 from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
-from langchain_core.runnables import RunnableLambda
-import tiktoken
 
-from redbox.models.chain import ChainInput, ChainState
+from redbox.models.chain import RedboxQuery, RedboxState
 from redbox import Redbox
 from redbox.models.chat import ChatRoute
 from redbox.models.settings import Settings
-from redbox.test.data import TestData, RedboxChatTestCase, generate_test_cases
+from redbox.test.data import (
+    TestData,
+    RedboxChatTestCase,
+    generate_test_cases,
+    mock_all_chunks_retriever,
+    mock_parameterised_retriever,
+)
 
 
-LANGGRAPH_DEBUG = False
+LANGGRAPH_DEBUG = True
 
 test_env = Settings()
 
@@ -19,7 +23,7 @@ TEST_CASES = [
     test_case
     for generated_cases in [
         generate_test_cases(
-            query=ChainInput(question="What is AI?", file_uuids=[], user_uuid=uuid4(), chat_history=[]),
+            query=RedboxQuery(question="What is AI?", file_uuids=[], user_uuid=uuid4(), chat_history=[]),
             test_data=[
                 TestData(0, 0, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat),
                 TestData(1, 100, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat),
@@ -28,55 +32,54 @@ TEST_CASES = [
             test_id="Basic Chat",
         ),
         generate_test_cases(
-            query=ChainInput(question="What is AI?", file_uuids=[uuid4()], user_uuid=uuid4(), chat_history=[]),
+            query=RedboxQuery(question="What is AI?", file_uuids=[uuid4()], user_uuid=uuid4(), chat_history=[]),
             test_data=[
                 TestData(
                     1, 1000, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat_with_docs
                 ),
                 TestData(
-                    1, 50000, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat_with_docs
+                    1, 50_000, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat_with_docs
                 ),
                 TestData(
-                    1, 200_000, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat_with_docs
+                    1, 80_000, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat_with_docs
                 ),
             ],
             test_id="Chat with single doc",
         ),
         generate_test_cases(
-            query=ChainInput(question="What is AI?", file_uuids=[uuid4(), uuid4()], user_uuid=uuid4(), chat_history=[]),
+            query=RedboxQuery(
+                question="What is AI?", file_uuids=[uuid4(), uuid4()], user_uuid=uuid4(), chat_history=[]
+            ),
             test_data=[
                 TestData(
-                    2,
-                    40000,
-                    expected_llm_response=["Map Step Response"] * 2 + ["Testing Response 1"],
-                    expected_route=ChatRoute.chat_with_docs,
+                    2, 40_000, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat_with_docs
                 ),
                 TestData(
-                    2,
-                    100_000,
-                    expected_llm_response=["Map Step Response"] * 2 + ["Testing Response 1"],
-                    expected_route=ChatRoute.chat_with_docs,
+                    2, 80_000, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat_with_docs
                 ),
                 TestData(
-                    2,
-                    200_000,
-                    expected_llm_response=["Map Step Response"] * 2 + ["Testing Response 1"],
-                    expected_route=ChatRoute.chat_with_docs,
+                    4,
+                    140_000,
+                    expected_llm_response=["Map Step Response"] * 4 + ["These documents are too large to work with."],
+                    expected_route=ChatRoute.chat_with_docs_map_reduce,
                 ),
             ],
             test_id="Chat with multiple docs",
         ),
         generate_test_cases(
-            query=ChainInput(question="What is AI?", file_uuids=[uuid4()], user_uuid=uuid4(), chat_history=[]),
+            query=RedboxQuery(question="What is AI?", file_uuids=[uuid4()], user_uuid=uuid4(), chat_history=[]),
             test_data=[
                 TestData(
-                    1, 200_000, expected_llm_response=["Testing Response 1"], expected_route=ChatRoute.chat_with_docs
+                    2,
+                    200_000,
+                    expected_llm_response=["Map Step Response"] * 2 + ["These documents are too large to work with."],
+                    expected_route=ChatRoute.chat_with_docs_map_reduce,
                 ),
             ],
             test_id="Chat with large doc",
         ),
         generate_test_cases(
-            query=ChainInput(question="@search What is AI?", file_uuids=[uuid4()], user_uuid=uuid4(), chat_history=[]),
+            query=RedboxQuery(question="@search What is AI?", file_uuids=[uuid4()], user_uuid=uuid4(), chat_history=[]),
             test_data=[
                 TestData(
                     1,
@@ -94,7 +97,7 @@ TEST_CASES = [
             test_id="Search",
         ),
         generate_test_cases(
-            query=ChainInput(
+            query=RedboxQuery(
                 question="@nosuchkeyword What is AI?", file_uuids=[uuid4()], user_uuid=uuid4(), chat_history=[]
             ),
             test_data=[
@@ -117,43 +120,22 @@ def env():
     return Settings()
 
 
-@pytest.fixture(scope="session")
-def tokeniser():
-    return tiktoken.get_encoding("cl100k_base")
-
-
-def all_chunks_retriever(docs):
-    def mock_retrieve(query):
-        return docs
-
-    return RunnableLambda(mock_retrieve)
-
-
-def parameterised_retriever(docs):
-    def mock_retrieve(query):
-        return docs
-
-    return RunnableLambda(mock_retrieve)
-
-
 @pytest.mark.asyncio
 @pytest.mark.parametrize(("test_case"), TEST_CASES, ids=[t.test_id for t in TEST_CASES])
 async def test_chat(test_case: RedboxChatTestCase, env, tokeniser):
     app = Redbox(
         llm=GenericFakeChatModel(messages=iter(test_case.test_data.expected_llm_response)),
-        all_chunks_retriever=all_chunks_retriever(test_case.docs),
-        parameterised_retriever=parameterised_retriever(test_case.docs),
+        all_chunks_retriever=mock_all_chunks_retriever(test_case.docs),
+        parameterised_retriever=mock_parameterised_retriever(test_case.docs),
         tokeniser=tokeniser,
         env=env,
         debug=LANGGRAPH_DEBUG,
     )
-    response = await app.run(
-        input=ChainState(query=test_case.query),
-    )
-    final_state = ChainState(response)
+    response = await app.run(input=RedboxState(request=test_case.query))
+    final_state = RedboxState(response)
     assert (
-        final_state["response"] == test_case.test_data.expected_llm_response[-1]
-    ), f"Expected LLM response: '{test_case.test_data.expected_llm_response[-1]}'. Received '{final_state["response"]}'"
+        final_state["text"] == test_case.test_data.expected_llm_response[-1]
+    ), f"Expected LLM response: '{test_case.test_data.expected_llm_response[-1]}'. Received '{final_state["text"]}'"
     assert (
         final_state["route_name"] == test_case.test_data.expected_route
     ), f"Expected Route: '{ test_case.test_data.expected_route}'. Received '{final_state["route_name"]}'"
@@ -164,8 +146,8 @@ async def test_chat(test_case: RedboxChatTestCase, env, tokeniser):
 async def test_streaming(test_case: RedboxChatTestCase, env, tokeniser):
     app = Redbox(
         llm=GenericFakeChatModel(messages=iter(test_case.test_data.expected_llm_response)),
-        all_chunks_retriever=all_chunks_retriever(test_case.docs),
-        parameterised_retriever=parameterised_retriever(test_case.docs),
+        all_chunks_retriever=mock_all_chunks_retriever(test_case.docs),
+        parameterised_retriever=mock_parameterised_retriever(test_case.docs),
         tokeniser=tokeniser,
         env=env,
         debug=LANGGRAPH_DEBUG,
@@ -177,30 +159,32 @@ async def test_streaming(test_case: RedboxChatTestCase, env, tokeniser):
         token_events.append(tokens)
 
     response = await app.run(
-        input=ChainState(query=test_case.query), response_tokens_callback=streaming_response_handler
+        input=RedboxState(request=test_case.query), response_tokens_callback=streaming_response_handler
     )
-    final_state = ChainState(response)
+
+    final_state = RedboxState(response)
 
     # Bit of a bodge to retain the ability to check that the LLM streaming is working in most cases
     if not final_state["route_name"].startswith("error"):
         assert len(token_events) > 1, f"Expected tokens as a stream. Received: {token_events}"
+
     llm_response = "".join(token_events)
+
     assert (
-        final_state["response"] == llm_response
-    ), f"Expected LLM response: '{llm_response}'. Received '{final_state["response"]}'"
+        final_state["text"] == llm_response
+    ), f"Expected LLM response: '{llm_response}'. Received '{final_state["text"]}'"
     assert (
         final_state["route_name"] == test_case.test_data.expected_route
     ), f"Expected Route: '{ test_case.test_data.expected_route}'. Received '{final_state["route_name"]}'"
 
 
-def get_available_keywords():
+def test_get_available_keywords(tokeniser):
     app = Redbox(
         llm=GenericFakeChatModel(messages=iter([])),
-        all_chunks_retriever=all_chunks_retriever([]),
-        parameterised_retriever=parameterised_retriever([]),
+        all_chunks_retriever=mock_all_chunks_retriever([]),
+        parameterised_retriever=mock_parameterised_retriever([]),
         tokeniser=tokeniser,
         env=env,
-        ai=None,
         debug=LANGGRAPH_DEBUG,
     )
     keywords = {ChatRoute.search}

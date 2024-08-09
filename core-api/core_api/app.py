@@ -13,8 +13,12 @@ from redbox.models import Settings, StatusResponse
 
 # === Logging ===
 
+filehandler = logging.FileHandler("coreapi.log")
+filehandler.setLevel(logging.INFO)
+
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
 logger = logging.getLogger()
+logger.addHandler(filehandler)
 
 env = Settings()
 

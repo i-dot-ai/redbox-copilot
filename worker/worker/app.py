@@ -11,7 +11,7 @@ from faststream.redis import RedisBroker
 from langchain_core.runnables import Runnable, RunnableParallel
 from langchain_elasticsearch.vectorstores import ElasticsearchStore, BM25RetrievalStrategy
 
-from redbox.embeddings import get_embeddings
+from redbox.chains.components import get_embeddings
 from redbox.models import File, ProcessingStatusEnum, Settings
 from redbox.storage.elasticsearch import ElasticsearchStorageHandler
 from redbox.loader import UnstructuredLargeChunkLoader, UnstructuredTitleLoader

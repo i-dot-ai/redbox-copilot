@@ -2,10 +2,12 @@ from dataclasses import dataclass, field
 import datetime
 import logging
 from uuid import UUID
+from typing import Generator
 
 from langchain_core.documents import Document
+from langchain_core.retrievers import BaseRetriever
 
-from redbox.models.chain import ChainInput
+from redbox.models.chain import RedboxQuery
 from redbox.models.chat import ChatRoute
 from redbox.models.file import ChunkMetadata, ChunkResolution
 
@@ -20,7 +22,7 @@ def generate_docs(
     total_tokens=6000,
     number_of_docs: int = 10,
     chunk_resolution=ChunkResolution.normal,
-):
+) -> Generator[Document, None, None]:
     for i in range(number_of_docs):
         yield Document(
             page_content=f"Document {i} text",
@@ -50,7 +52,7 @@ class RedboxChatTestCase:
     def __init__(
         self,
         test_id: str,
-        query: ChainInput,
+        query: RedboxQuery,
         test_data: TestData,
         docs_user_uuid_override: UUID | None = None,
         docs_file_uuids_override: list[UUID] | None = None,
@@ -92,7 +94,25 @@ class RedboxChatTestCase:
         ]
 
 
-def generate_test_cases(query: ChainInput, test_data: list[TestData], test_id: str):
+def generate_test_cases(query: RedboxQuery, test_data: list[TestData], test_id: str) -> list[RedboxChatTestCase]:
     return [
         RedboxChatTestCase(test_id=f"{test_id}-{i}", query=query, test_data=data) for i, data in enumerate(test_data)
     ]
+
+
+class FakeRetriever(BaseRetriever):
+    docs: list[Document]
+
+    def _get_relevant_documents(self, query: str) -> list[Document]:
+        return self.docs
+
+    async def _aget_relevant_documents(self, query: str) -> list[Document]:
+        return self.docs
+
+
+def mock_all_chunks_retriever(docs: list[Document]) -> FakeRetriever:
+    return FakeRetriever(docs=docs)
+
+
+def mock_parameterised_retriever(docs: list[Document]) -> FakeRetriever:
+    return FakeRetriever(docs=docs)

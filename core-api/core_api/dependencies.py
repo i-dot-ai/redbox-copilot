@@ -13,7 +13,7 @@ from langchain_core.retrievers import BaseRetriever
 from redbox.api.callbacks import LoggerCallbackHandler
 from redbox.retriever import AllElasticsearchRetriever, ParameterisedElasticsearchRetriever
 from redbox.models import Settings
-from redbox.embeddings import get_embeddings
+from redbox.chains.components import get_embeddings
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
@@ -104,4 +104,4 @@ def get_redbox(
     tokeniser: Annotated[tiktoken.Encoding, Depends(get_tokeniser)],
     env: Annotated[Settings, Depends(get_env)],
 ) -> Redbox:
-    return Redbox(llm, all_chunks_retriever, parameterised_retriever, tokeniser, env)
+    return Redbox(llm, all_chunks_retriever, parameterised_retriever, tokeniser, env, debug=True)

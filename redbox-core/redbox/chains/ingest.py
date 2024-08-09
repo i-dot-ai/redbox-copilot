@@ -5,7 +5,7 @@ from functools import partial
 
 from langchain.vectorstores import VectorStore
 from langchain_core.documents.base import Document
-from langchain_core.runnables import RunnableLambda, chain
+from langchain_core.runnables import RunnableLambda, chain, Runnable
 
 from redbox.models.settings import Settings
 from redbox.models.file import File
@@ -27,7 +27,7 @@ def log_chunks(chunks: list[Document]):
     return chunks
 
 
-def document_loader(document_loader_type: type[BaseRedboxFileLoader], s3_client: S3Client, env: Settings):
+def document_loader(document_loader_type: type[BaseRedboxFileLoader], s3_client: S3Client, env: Settings) -> Runnable:
     @chain
     def wrapped(file: File):
         file_bytes = s3_client.get_object(Bucket=file.bucket, Key=file.key)["Body"].read()
@@ -38,7 +38,7 @@ def document_loader(document_loader_type: type[BaseRedboxFileLoader], s3_client:
 
 def ingest_from_loader(
     document_loader_type: type[BaseRedboxFileLoader], s3_client: S3Client, vectorstore: VectorStore, env: Settings
-):
+) -> Runnable:
     return (
         document_loader(document_loader_type=document_loader_type, s3_client=s3_client, env=env)
         | RunnableLambda(list)

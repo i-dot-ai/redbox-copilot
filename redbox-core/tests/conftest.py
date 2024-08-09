@@ -3,6 +3,7 @@ from uuid import uuid4
 
 import pytest
 from elasticsearch import Elasticsearch
+import tiktoken
 
 from redbox.models import File, Settings
 from redbox.storage.elasticsearch import ElasticsearchStorageHandler
@@ -11,7 +12,6 @@ from collections.abc import Generator
 
 from langchain_core.embeddings.fake import FakeEmbeddings
 from langchain_elasticsearch import ElasticsearchStore
-
 
 from redbox.retriever import AllElasticsearchRetriever, ParameterisedElasticsearchRetriever
 from redbox.test.data import RedboxChatTestCase
@@ -192,3 +192,8 @@ def embedding_model_dim() -> int:
 @pytest.fixture(scope="session")
 def embedding_model(embedding_model_dim):
     return FakeEmbeddings(size=embedding_model_dim)
+
+
+@pytest.fixture(scope="session")
+def tokeniser():
+    return tiktoken.get_encoding("cl100k_base")

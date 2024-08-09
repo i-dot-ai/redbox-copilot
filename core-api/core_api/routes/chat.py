@@ -10,7 +10,7 @@ from fastapi.encoders import jsonable_encoder
 from openai import APIError
 from langchain_core.documents import Document
 
-from redbox.models.chain import ChainInput, ChainChatMessage, ChainState
+from redbox.models.chain import RedboxQuery, RedboxState, ChainChatMessage
 from redbox.models.chat import ChatRequest, ChatResponse, ClientResponse, ErrorDetail
 from redbox.transform import map_document_to_source_document
 
@@ -44,8 +44,8 @@ async def rag_chat(
     redbox: Annotated[Redbox, Depends(get_redbox)],
 ) -> ChatResponse:
     """REST endpoint. Get a LLM response to a question history and file."""
-    state = ChainState(
-        query=ChainInput(
+    state = RedboxState(
+        request=RedboxQuery(
             question=chat_request.message_history[-1].text,
             file_uuids=[f.uuid for f in chat_request.selected_files],
             user_uuid=user_uuid,
@@ -79,8 +79,8 @@ async def rag_chat_streamed(
     request = await websocket.receive_text()
     chat_request = ChatRequest.model_validate_json(request)
 
-    state = ChainState(
-        query=ChainInput(
+    state = RedboxState(
+        request=RedboxQuery(
             question=chat_request.message_history[-1].text,
             file_uuids=[f.uuid for f in chat_request.selected_files],
             user_uuid=user_uuid,

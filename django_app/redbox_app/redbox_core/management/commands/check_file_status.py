@@ -17,7 +17,7 @@ def remove_from_django(file: File):
     try:
         file.delete_from_s3()
     except BotoCoreError as e:
-        if getattr(e, "response", None) and (
+        if getattr(e, "text", None) and (
             e.response["Error"]["Code"] == str(HTTPStatus.NOT_FOUND) or e.response["Error"]["Code"] == "NoSuchKey"
         ):
             logger.exception("File %s does not exist in s3, marking as deleted", file, exc_info=e)

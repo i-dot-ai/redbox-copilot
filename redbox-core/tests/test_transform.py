@@ -5,7 +5,7 @@ import pytest
 from langchain_core.documents.base import Document
 
 from redbox.transform import combine_documents, map_document_to_source_document
-from redbox.api.runnables import filter_by_elbow
+from redbox.retriever.retrievers import filter_by_elbow
 
 document_created = datetime.now(UTC)
 
@@ -185,7 +185,7 @@ def test_elbow_filter(scores: list[float], target_len: int):
 
     documents = [Document(page_content="foo", metadata={"score": score}) for score in scores]
 
-    documents_filtered = elbow_filter.invoke(documents)
+    documents_filtered = elbow_filter(documents)
 
     assert (
         len(documents_filtered) == target_len

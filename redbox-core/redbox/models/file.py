@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum, StrEnum
-from uuid import UUID
+from uuid import UUID, uuid4
 import datetime
 
 import tiktoken
@@ -76,6 +76,7 @@ class ChunkMetadata(BaseModel):
     This is the minimal metadata that all ingest chains provide and should not be used to map retrieved documents (as fields will be lost)
     """
 
+    uuid: UUID = Field(default_factory=uuid4)
     parent_file_uuid: UUID
     creator_user_uuid: UUID
     index: int
