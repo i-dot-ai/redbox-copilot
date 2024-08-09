@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpResponse
-from import_export.admin import ImportMixin
+from import_export.admin import ExportMixin, ImportExportMixin
 from requests.exceptions import RequestException
 
 from redbox_app.redbox_core.client import CoreApiClient
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 core_api = CoreApiClient(host=settings.CORE_API_HOST, port=settings.CORE_API_PORT)
 
 
-class UserAdmin(ImportMixin, admin.ModelAdmin):
+class UserAdmin(ImportExportMixin, admin.ModelAdmin):
     fields = [
         "email",
         "name",
@@ -53,7 +53,7 @@ class UserAdmin(ImportMixin, admin.ModelAdmin):
         import_id_fields = ["email"]
 
 
-class FileAdmin(admin.ModelAdmin):
+class FileAdmin(ExportMixin, admin.ModelAdmin):
     def reupload(self, request, queryset):  # noqa:ARG002
         for file in queryset:
             try:
@@ -78,30 +78,40 @@ class FileAdmin(admin.ModelAdmin):
 class CitationInline(admin.StackedInline):
     model = models.Citation
     ordering = ("modified_at",)
+    readonly_fields = ["text", "role", "route", "rating"]
 
     extra = 1
 
 
-class ChatMessageAdmin(admin.ModelAdmin):
-    list_display = ["text", "role", "get_user", "chat", "route", "created_at"]
+class ChatMessageAdmin(ExportMixin, admin.ModelAdmin):
+    list_display = ["short_text", "role", "get_user", "chat", "route", "created_at"]
     list_filter = ["role", "route", "chat__user"]
     date_hierarchy = "created_at"
     inlines = [CitationInline]
+    readonly_fields = ["selected_files", "source_files"]
 
     @admin.display(ordering="chat__user", description="User")
     def get_user(self, obj):
         return obj.chat.user
 
+    @admin.display(description="text")
+    def short_text(self, obj):
+        max_length = 128
+        if len(obj.text) < max_length:
+            return obj.text
+        return obj.text[: max_length - 3] + "..."
+
 
 class ChatMessageInline(admin.StackedInline):
     model = models.ChatMessage
     ordering = ("modified_at",)
-    readonly_fields = ["modified_at", "source_files"]
+    fields = ["text", "role", "route", "rating"]
+    readonly_fields = ["text", "role", "route", "rating"]
     extra = 1
     show_change_link = True  # allows users to click through to look at Citations
 
 
-class ChatAdmin(admin.ModelAdmin):
+class ChatAdmin(ExportMixin, admin.ModelAdmin):
     def export_as_csv(self, request, queryset: QuerySet):  # noqa:ARG002
         history_field_names: list[str] = [field.name for field in models.Chat._meta.fields]  # noqa:SLF001
         message_field_names: list[str] = [field.name for field in models.ChatMessage._meta.fields]  # noqa:SLF001
@@ -130,18 +140,8 @@ class ChatAdmin(admin.ModelAdmin):
     actions = ["export_as_csv"]
 
 
-class CitationAdmin(admin.ModelAdmin):
-    list_display = ["text", "get_user", "chat_message", "file"]
-    list_filter = ["chat_message__chat__user"]
-
-    @admin.display(ordering="chat_message__chat__user", description="User")
-    def get_user(self, obj):
-        return obj.chat_message.chat.user
-
-
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.File, FileAdmin)
 admin.site.register(models.Chat, ChatAdmin)
 admin.site.register(models.ChatMessage, ChatMessageAdmin)
 admin.site.register(models.AISettings)
-admin.site.register(models.Citation, CitationAdmin)
